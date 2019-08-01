@@ -1,0 +1,69 @@
+pos .loyalty-label {
+    font-size: 16px;
+    color: white;
+    font-weight: 900;
+    width: 240px;
+    text-align: left;
+    border-bottom: 1px solid;
+    margin-right: 100px;
+    margin-bottom: 20px;
+}
+.pos .loyalty-label {
+    font-size: 16px;
+    max-width: 125px;
+    color: #E91E63;
+    width: 200px;
+    text-align: left;
+    border-bottom: 1px solid;
+    margin-right: 100px;
+    margin-bottom: 10px;
+}
+.pos .order .loyalty {
+    width: 240px;
+    text-align: left;
+    padding-left: 10px;
+    border-radius: 5px;
+    max-width: 200px;
+    font-size: 14px;
+    margin-left: 10px;
+    color: black;
+    font-weight: 400;
+    background: #e7fbe8;
+    margin-bottom: 20px;
+}
+.pos .line_plus_point {
+    border-bottom: 1px solid;
+}
+.pos .loyalty_remaining_point {
+    border-top: solid 1px;
+    border-bottom: solid 1px;
+}
+
+.pos .plus_point {
+    float: right;
+    padding-right: 10px;
+}
+
+.pos .redeem_point {
+    float: right;
+    padding-right: 10px;
+}
+
+.pos .remaining_point {
+    float: right;
+    padding-right: 10px;
+}
+
+.pos .client_point {
+    float: right;
+    padding-right: 10px;
+}
+
+.pos .next_point {
+    float: right;
+    padding-right: 10px;
+}
+
+.pos .line_redeem_point {
+    color: red;
+}
