@@ -31,7 +31,7 @@ class pos_controller(PosController):
                 ('state', '=', 'opened'),
                 ('user_id', '=', request.session.uid),
                 ('rescue', '=', False)])
-        if not pos_sessions:  # auto directly login odoo to pos
+        if not pos_sessions:  # auto direct login odoo to pos
             if request.env.user.pos_config_id:
                 request.env.user.pos_config_id.current_session_id = request.env['pos.session'].sudo(request.env.user.id).create({
                     'user_id': request.env.user.id,
@@ -47,6 +47,7 @@ class pos_controller(PosController):
             #--------------------------------------------------
             # when session have attribute, pos model loaded will remove models product, customer, pos order  ...etc
             # and user our solution for big datas, else switch to default odoo
+            # --------------------------------------------------
             config = pos_session.config_id
             session_info['big_datas'] = config.big_datas
         session_info['currency_id'] = request.env.user.company_id.currency_id.id
@@ -107,7 +108,6 @@ class pos_bus(BusController):
             channels.append((request.db, 'pos.remote_sessions', request.env.user.id))
             channels.append((request.db, 'pos.sync.sessions', request.env.user.id))
             channels.append((request.db, 'pos.sync.backend', request.env.user.id))
-            channels.append((request.db, 'pos.sync.stock', request.env.user.id))
         return super(pos_bus, self)._poll(dbname, channels, last, options)
 
     @http.route('/pos/update_order/status', type="json", auth="public")

@@ -25,75 +25,17 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                 args: [datas['code']],
             }).then(function (voucher) {
                 if (voucher == -1) {
-                    self.pos.gui.show_popup('dialog', {
-                        title: 'Warning',
-                        body: 'Voucher expired date or used before',
+                    self.pos.gui.show_popup('confirm', {
+                        title: 'Error',
+                        body: 'Voucher Expired Date or Used before',
                     });
                     return status.resolve(false);
                 } else {
-                    var current_order = self.pos.get('selectedOrder');
-                    current_order.voucher_id = voucher.id;
-                    var voucher_register = _.find(self.pos.cashregisters, function (cashregister) {
-                        return cashregister.journal['pos_method_type'] == 'voucher';
-                    });
-                    if (voucher_register) {
-                        if (voucher['customer_id'] && voucher['customer_id'][0]) {
-                            var client = self.pos.db.get_partner_by_id(voucher['customer_id'][0]);
-                            if (client) {
-                                current_order.set_client(client)
-                            }
-                        }
-                        var amount = 0;
-                        if (voucher['apply_type'] == 'fixed_amount') {
-                            amount = voucher.value;
-                        } else {
-                            amount = current_order.get_total_with_tax() / 100 * voucher.value;
-                        }
-                        if (amount <= 0) {
-                            return self.pos.gui.show_popup('dialog', {
-                                title: 'Warning',
-                                body: 'Voucher limited value',
-                            });
-                        }
-                        // remove old paymentline have journal is voucher
-                        var paymentlines = current_order.paymentlines;
-                        for (var i = 0; i < paymentlines.models.length; i++) {
-                            var payment_line = paymentlines.models[i];
-                            if (payment_line.cashregister.journal['pos_method_type'] == 'voucher') {
-                                payment_line.destroy();
-                            }
-                        }
-                        // add new payment with this voucher just scanned
-                        var voucher_paymentline = new models.Paymentline({}, {
-                            order: current_order,
-                            cashregister: voucher_register,
-                            pos: self.pos
-                        });
-                        voucher_paymentline['voucher_id'] = voucher['id'];
-                        voucher_paymentline['voucher_code'] = voucher['code'];
-                        var due = current_order.get_due();
-                        if (amount >= due) {
-                            voucher_paymentline.set_amount(due);
-                        } else {
-                            voucher_paymentline.set_amount(amount);
-                        }
-                        voucher_paymentline['voucher_id'] = voucher['id'];
-                        current_order.paymentlines.add(voucher_paymentline);
-                        current_order.trigger('change', current_order);
-                        self.pos.gui.show_popup('dialog', {
-                            title: 'Good job !',
-                            body: 'Voucher code ' + voucher['code'] + ' just added to payment screen',
-                            color: 'success'
-                        });
-                        return status.resolve(true);
-
-                    } else {
-                        self.pos.gui.show_popup('dialog', {
-                            title: 'Warning !',
-                            body: 'Your pos config have not added payment method voucher or your payment method have type is not voucher',
-                        });
-                        return status.reject(false);
+                    var order = self.pos.get_order();
+                    if (order) {
+                        order.client_use_voucher(voucher)
                     }
+                    return status.resolve(true);
                 }
             }).fail(function (type, error) {
                 self.pos.gui.show_popup('dialog', {
@@ -116,13 +58,15 @@ odoo.define('pos_retail.screen_voucher', function (require) {
         _flush_orders: function (orders, options) {
             var self = this;
             this.wait_print_voucher = false;
-            for (var i=0; i < orders.length; i++) {
+            for (var i = 0; i < orders.length; i++) {
                 var order = orders[i]['data'];
-                var line_voucher = _.find(order.lines, function (line) {
-                    return line[2].voucher != undefined
-                });
-                if (line_voucher) {
-                    this.wait_print_voucher = true;
+                for (var n = 0; n < order.lines.length; n++) {
+                    var line = order.lines[n];
+                    var product_id = line[2]['product_id'];
+                    var product = this.db.get_product_by_id(product_id);
+                    if (product.is_voucher) {
+                        this.wait_print_voucher = true;
+                    }
                 }
             }
             return _super_PosModel._flush_orders.apply(this, arguments).done(function (order_ids) {
@@ -191,14 +135,11 @@ odoo.define('pos_retail.screen_voucher', function (require) {
             }
         },
         add_product: function (product, options) {
-            var self = this;
             _super_Order.add_product.apply(this, arguments);
             if (product.is_voucher && this.pos.config.print_voucher) {
-                setTimeout(function () {
-                    self.show_popup_create_voucher();
-                }, 1000);
+                this.show_popup_create_voucher();
             }
-            if (product.is_voucher && ! this.pos.config.print_voucher) {
+            if (product.is_voucher && !this.pos.config.print_voucher) {
                 this.pos.gui.show_popup('confirm', {
                     title: 'Warning',
                     body: 'Product selected is voucher but your pos config not active Create/print voucher. Please check your pos config'
@@ -215,6 +156,67 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                 this.set_to_invoice(false);
             }
             this.trigger('change');
+        },
+        client_use_voucher: function (voucher) {
+            this.voucher_id = voucher.id;
+            var voucher_register = _.find(this.pos.cashregisters, function (cashregister) {
+                return cashregister.journal['pos_method_type'] == 'voucher';
+            });
+            if (voucher_register) {
+                var due = this.get_due();
+                if (voucher['customer_id'] && voucher['customer_id'][0]) {
+                    var client = this.pos.db.get_partner_by_id(voucher['customer_id'][0]);
+                    if (client) {
+                        this.set_client(client)
+                    }
+                }
+                var amount = 0;
+                if (voucher['apply_type'] == 'fixed_amount') {
+                    amount = voucher.value;
+                } else {
+                    amount = this.get_total_with_tax() / 100 * voucher.value;
+                }
+                if (amount <= 0) {
+                    return this.pos.gui.show_popup('confirm', {
+                        title: 'Warning',
+                        body: 'Voucher have Used full Value',
+                    });
+                }
+                if (due <= 0) { // TODO: allow cashiers add many voucher base on 1 order
+                    var paymentlines = this.paymentlines;
+                    for (var i = 0; i < paymentlines.models.length; i++) {
+                        var payment_line = paymentlines.models[i];
+                        if (payment_line.cashregister.journal['pos_method_type'] == 'voucher') {
+                            payment_line.destroy();
+                        }
+                    }
+                }
+                var voucher_paymentline = new models.Paymentline({}, {
+                    order: this,
+                    cashregister: voucher_register,
+                    pos: this.pos
+                });
+                voucher_paymentline['voucher_id'] = voucher['id'];
+                voucher_paymentline['voucher_code'] = voucher['code'];
+                if (amount >= due) {
+                    voucher_paymentline.set_amount(due);
+                } else {
+                    voucher_paymentline.set_amount(amount);
+                }
+                voucher_paymentline['voucher_id'] = voucher['id'];
+                this.paymentlines.add(voucher_paymentline);
+                this.trigger('change', this);
+                this.pos.gui.show_popup('confirm', {
+                    title: 'Good Job !',
+                    body: 'Voucher Code ' + voucher['code'] + ' just Added to Payment Lines',
+                    color: 'success'
+                });
+            } else {
+                this.pos.gui.show_popup('confirm', {
+                    title: 'Warning !',
+                    body: 'Your Pos Config have not Added Payment Method Voucher or Your Payment Method have Type is not Voucher',
+                });
+            }
         }
     });
 
@@ -306,68 +308,15 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                                 args: [code],
                             }).then(function (voucher) {
                                 if (voucher == -1) {
-                                    return self.gui.show_popup('dialog', {
-                                        title: 'Warning',
-                                        body: 'Voucher code used before or code doest not exist',
+                                    return self.gui.show_popup('confirm', {
+                                        title: 'Error',
+                                        body: 'Voucher used full valume or does not exist',
                                     });
                                 } else {
-                                    var current_order = self.pos.get('selectedOrder');
-                                    current_order.voucher_id = voucher.id;
-                                    var voucher_register = _.find(self.pos.cashregisters, function (cashregister) {
-                                        return cashregister.journal['pos_method_type'] == 'voucher';
-                                    });
-                                    if (voucher_register) {
-                                        if (voucher['customer_id'] && voucher['customer_id'][0]) {
-                                            var client = self.pos.db.get_partner_by_id(voucher['customer_id'][0]);
-                                            if (client) {
-                                                current_order.set_client(client)
-                                            }
-                                        }
-                                        var amount = 0;
-                                        if (voucher['apply_type'] == 'fixed_amount') {
-                                            amount = voucher.value;
-                                        } else {
-                                            amount = current_order.get_total_with_tax() / 100 * voucher.value;
-                                        }
-                                        if (amount <= 0) {
-                                            return self.pos.gui.show_popup('dialog', {
-                                                title: 'Warning',
-                                                body: 'Voucher limited value',
-                                            });
-                                        }
-                                        // remove old paymentline have journal is voucher
-                                        var paymentlines = current_order.paymentlines;
-                                        for (var i = 0; i < paymentlines.models.length; i++) {
-                                            var payment_line = paymentlines.models[i];
-                                            if (payment_line.cashregister.journal['pos_method_type'] == 'voucher') {
-                                                payment_line.destroy();
-                                            }
-                                        }
-                                        // add new payment with this voucher just scanned
-                                        var voucher_paymentline = new models.Paymentline({}, {
-                                            order: current_order,
-                                            cashregister: voucher_register,
-                                            pos: self.pos
-                                        });
-                                        var due = current_order.get_due();
-                                        if (amount >= due) {
-                                            voucher_paymentline.set_amount(due);
-                                        } else {
-                                            voucher_paymentline.set_amount(amount);
-                                        }
-                                        voucher_paymentline['voucher_id'] = voucher['id'];
-                                        voucher_paymentline['voucher_code'] = voucher['code'];
-                                        current_order.paymentlines.add(voucher_paymentline);
-                                        current_order.trigger('change', current_order);
-                                        self.render_paymentlines();
-                                        self.$('.paymentline.selected .edit').text(self.format_currency_no_symbol(amount));
-                                    } else {
-                                        return self.pos.gui.show_popup('dialog', {
-                                            title: 'Warning',
-                                            body: 'POS config not add payment method Voucher. Please add method voucher, close and reopen session',
-                                        });
+                                    var order = self.pos.get_order();
+                                    if (order) {
+                                        order.client_use_voucher(voucher)
                                     }
-
                                 }
                             }).fail(function (type, error) {
                                 return self.pos.query_backend_fail(type, error);
@@ -580,49 +529,6 @@ odoo.define('pos_retail.screen_voucher', function (require) {
             } catch (ex) {
                 console.log('dont worries, client without table select');
             }
-        },
-        update_summary: function () { // auto high light button edit voucher or disable high light
-            this._super();
-            var buttons = this.getParent().action_buttons;
-            var order = this.pos.get_order();
-            if (order && buttons && buttons.button_create_voucher) {
-                var selected_line = order.selected_orderline;
-                if (selected_line && selected_line.product && selected_line.product.is_voucher) {
-                    buttons.button_create_voucher.highlight(true);
-                } else {
-                    buttons.button_create_voucher.highlight(false);
-                }
-            }
-        }
-    });
-
-    var button_create_voucher = screens.ActionButtonWidget.extend({ // combo button
-        template: 'button_create_voucher',
-        button_click: function () {
-            var order = this.pos.get_order();
-            if (!order) {
-                return;
-            }
-            var selected_line = order.selected_orderline;
-            if (selected_line && selected_line.product.is_voucher) {
-                this.pos.gui.show_popup('popup_print_vouchers', {
-                    'selected_line': selected_line,
-                    'title': 'Please input information of voucher will create'
-                });
-            } else {
-                this.pos.gui.show_popup('dialog', {
-                    title: 'Warning',
-                    body: 'Line selected is not voucher'
-                });
-            }
-        }
-    });
-
-    screens.define_action_button({
-        'name': 'button_create_voucher',
-        'widget': button_create_voucher,
-        'condition': function () {
-            return this.pos.config.print_voucher;
         }
     });
 

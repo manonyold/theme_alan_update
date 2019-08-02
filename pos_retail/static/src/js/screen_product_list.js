@@ -153,63 +153,9 @@ odoo.define('pos_retail.screen_product_list', function (require) {
             this.$('.category-list-scroller').remove();
             this.$('.categories').remove();
             this.product_categories_widget.replace($('.rightpane-header'));  // could not use: this.$('.rightpane-header') because product operation update stock, could not refresh qty on hand
-            $('input').click(function () {
-                self.gui.screen_instances['products'].order_widget.remove_event_keyboard()
-            });
         },
         init_quickly_actions: function () {
             var self = this;
-            this.$('.add_customer').click(function () { // quickly add customer
-                self.pos.gui.show_popup('popup_create_customer', {
-                    title: 'Add customer'
-                })
-            });
-            this.$('.add_product').click(function () { // quickly add product
-                self.pos.gui.show_popup('popup_create_product', {
-                    title: 'Add product',
-                })
-            });
-            this.$('.add_pos_category').click(function () { // quickly add product
-                self.pos.gui.show_popup('popup_create_pos_category', {
-                    title: 'Add category'
-                })
-            });
-            this.$('.quickly_payment').click(function () { // quickly payment
-                if (!self.pos.config.quickly_payment_full_journal_id) {
-                    return;
-                }
-                var order = self.pos.get_order();
-                if (!order) {
-                    return;
-                }
-                if (order.orderlines.length == 0) {
-                    return self.pos.gui.show_popup('dialog', {
-                        title: 'Error',
-                        body: 'Your order lines is blank'
-                    })
-                }
-                var paymentlines = order.get_paymentlines();
-                for (var i = 0; i < paymentlines.length; i++) {
-                    paymentlines[i].destroy();
-                }
-                var register = _.find(self.pos.cashregisters, function (register) {
-                    return register['journal']['id'] == self.pos.config.quickly_payment_full_journal_id[0];
-                });
-                if (!register) {
-                    return self.pos.gui.show_popup('dialog', {
-                        title: 'Error',
-                        body: 'Your config not add quickly payment method, please add before use'
-                    })
-                }
-                var amount_due = order.get_due();
-                order.add_paymentline(register);
-                var selected_paymentline = order.selected_paymentline;
-                selected_paymentline.set_amount(amount_due);
-                order.initialize_validation_date();
-                self.pos.push_order(order);
-                self.pos.gui.show_screen('receipt');
-
-            });
         },
         apply_quickly_search_products: function () {
             var self = this;
@@ -225,7 +171,7 @@ odoo.define('pos_retail.screen_product_list', function (require) {
                         }
                         setTimeout(function () {
                             self.product_categories_widget.clear_search();
-                        }, 2000);
+                        }, 100);
                     }
 
                 }
@@ -244,12 +190,14 @@ odoo.define('pos_retail.screen_product_list', function (require) {
                             var partner = self.pos.db.partner_by_id[parseInt(ui['item']['value'])];
                             if (partner) {
                                 self.gui.screen_instances["clientlist"]['new_client'] = partner;
-                                self.pos.trigger('client:save_changes');
                                 setTimeout(function () {
                                     var input = $('.find_customer input');
                                     input.val("");
                                     input.focus();
-                                }, 2000);
+                                    self.pos.trigger('client:save_changes');
+                                    self.apply_quickly_search_partners();
+                                    self.order_widget.add_event_keyboard();
+                                }, 100);
                             }
                         }
                     }
@@ -313,9 +261,6 @@ odoo.define('pos_retail.screen_product_list', function (require) {
                 $('.categories_list').css('width', '20%');
                 $('.product-list-scroller').css('width', '80%');
             }
-            $('input').click(function () {
-                self.gui.screen_instances['products'].order_widget.remove_event_keyboard();
-            });
         }
     });
 

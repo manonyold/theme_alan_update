@@ -36,19 +36,19 @@ class pos_config(models.Model):
         return True
 
     user_id = fields.Many2one('res.users', 'Assigned to')
-    config_access_right = fields.Boolean('Config access right', default=1)
-    allow_discount = fields.Boolean('Change discount', default=1)
-    allow_qty = fields.Boolean('Change quantity', default=1)
-    allow_price = fields.Boolean('Change price', default=1)
-    allow_remove_line = fields.Boolean('Remove line', default=1)
-    allow_numpad = fields.Boolean('Display numpad', default=1)
-    allow_payment = fields.Boolean('Display payment', default=1)
-    allow_customer = fields.Boolean('Choose customer', default=1)
-    allow_add_order = fields.Boolean('New order', default=1)
-    allow_remove_order = fields.Boolean('Remove order', default=1)
-    allow_add_product = fields.Boolean('Add line', default=1)
+    config_access_right = fields.Boolean('Config Access Right', default=1)
+    allow_discount = fields.Boolean('Change Discount', default=1)
+    allow_qty = fields.Boolean('Change Quantity', default=1)
+    allow_price = fields.Boolean('Change Price', default=1)
+    allow_remove_line = fields.Boolean('Remove Line', default=1)
+    allow_numpad = fields.Boolean('Display Numpad', default=1)
+    allow_payment = fields.Boolean('Display Payment', default=1)
+    allow_customer = fields.Boolean('Choose Customer', default=1)
+    allow_add_order = fields.Boolean('New Order', default=1)
+    allow_remove_order = fields.Boolean('Remove Order', default=1)
+    allow_add_product = fields.Boolean('Add Line', default=1)
 
-    allow_lock_screen = fields.Boolean('Lock screen when session start',
+    allow_lock_screen = fields.Boolean('Lock Screen when Session Start',
                                        default=0,
                                        help='When pos sessions start, \n'
                                             'cashiers required open POS via pos pass pin (Setting/Users)')
@@ -57,7 +57,7 @@ class pos_config(models.Model):
         ('locked', 'Locked')
     ], default='unlock', string='Lock state')
 
-    display_point_receipt = fields.Boolean('Display point / receipt')
+    display_point_receipt = fields.Boolean('Display Point / Receipt')
     loyalty_id = fields.Many2one('pos.loyalty', 'Loyalty',
                                  domain=[('state', '=', 'running')])
 
@@ -71,27 +71,27 @@ class pos_config(models.Model):
                                                                ' all promotions active auto add to order cart')
 
     create_purchase_order = fields.Boolean('Create PO', default=0)
-    create_purchase_order_required_signature = fields.Boolean('PO Required signature', default=0)
+    create_purchase_order_required_signature = fields.Boolean('PO Required Signature', default=0)
     purchase_order_state = fields.Selection([
-        ('confirm_order', 'Auto confirm'),
-        ('confirm_picking', 'Auto delivery'),
-        ('confirm_invoice', 'Auto invoice'),
+        ('confirm_order', 'Auto Confirm'),
+        ('confirm_picking', 'Auto Delivery'),
+        ('confirm_invoice', 'Auto Invoice'),
     ], 'PO state',
         help='This is state of purchase order will process to',
         default='confirm_invoice')
-    sale_order = fields.Boolean('Create Sale order', default=0)
-    sale_order_auto_confirm = fields.Boolean('Auto confirm', default=0)
-    sale_order_auto_invoice = fields.Boolean('Auto paid', default=0)
-    sale_order_auto_delivery = fields.Boolean('Auto delivery', default=0)
-    sale_order_print_receipt = fields.Boolean('Print receipt', help='Allow print receipt when create quotation/order')
-    sale_order_required_signature = fields.Boolean('SO Required signature',
+    sale_order = fields.Boolean('Create Sale Order', default=0)
+    sale_order_auto_confirm = fields.Boolean('Auto Confirm', default=0)
+    sale_order_auto_invoice = fields.Boolean('Auto Paid', default=0)
+    sale_order_auto_delivery = fields.Boolean('Auto Delivery', default=0)
+    sale_order_print_receipt = fields.Boolean('Print Receipt', help='Allow print receipt when create quotation/order')
+    sale_order_required_signature = fields.Boolean('SO Required Signature',
                                                    help='Allow print receipt when create quotation/order')
 
-    pos_orders_management = fields.Boolean('POS order management', default=0)
+    pos_orders_management = fields.Boolean('POS Order Management', default=0)
     pos_order_period_return_days = fields.Float('Return period days',
                                                 help='this is period time for customer can return order',
                                                 default=30)
-    display_return_days_receipt = fields.Boolean('Display return days receipt', default=0)
+    display_return_days_receipt = fields.Boolean('Display Return Days on Receipt', default=0)
     display_onhand = fields.Boolean('Show qty available product', default=1,
                                     help='Display quantity on hand all products on pos screen')
     allow_order_out_of_stock = fields.Boolean('Allow out-of-stock', default=1,
@@ -108,7 +108,6 @@ class pos_config(models.Model):
                                              help="When you checked, on pos order lines screen, \n"
                                                   "will display information person created order \n"
                                                   "(lines) Eg: create date, updated date ..")
-    quickly_payment = fields.Boolean('Quickly payment', default=0)
     internal_transfer = fields.Boolean('Internal transfer', default=0,
                                        help='Go Inventory and active multi warehouse and location')
     internal_transfer_auto_validate = fields.Boolean('Internal transfer auto validate', default=0)
@@ -179,7 +178,6 @@ class pos_config(models.Model):
     note_order = fields.Boolean('Note order', default=0)
     note_orderline = fields.Boolean('Note order line', default=0)
     signature_order = fields.Boolean('Signature order', default=0)
-    quickly_buttons = fields.Boolean('Quickly Actions', default=0)
     display_amount_discount = fields.Boolean('Display amount discount', default=0)
 
     booking_orders = fields.Boolean('Booking orders', default=0)
@@ -244,6 +242,7 @@ class pos_config(models.Model):
     customer_default_id = fields.Many2one('res.partner', 'Customer default')
     medical_insurance = fields.Boolean('Medical insurance', default=0)
     set_guest = fields.Boolean('Set guest', default=0)
+    set_guest_when_add_new_order = fields.Boolean('Ask guests', help='Ask how many guests when create new order')
     reset_sequence = fields.Boolean('Reset sequence order', default=0)
     update_tax = fields.Boolean('Modify tax', default=0, help='Cashier can change tax of order line')
     update_tax_ids = fields.Many2many('account.tax', 'pos_config_tax_rel', 'config_id', 'tax_id', string='List Taxes')
@@ -256,7 +255,7 @@ class pos_config(models.Model):
     review_receipt_before_paid = fields.Boolean('Review receipt before paid', help='Show receipt before paid order',
                                                 default=1)
     keyboard_event = fields.Boolean('Keyboard event', default=1, help='Allow cashiers use shortcut keyboard')
-    switch_user = fields.Boolean('Switch user', default=0, help='Allow cashiers switch to another cashier')
+    switch_user = fields.Boolean('Switch user', default=0, help='Allow cashiers user change between pos config')
     change_unit_of_measure = fields.Boolean('Change unit of measure', default=0,
                                             help='Allow cashiers change unit of measure of order lines')
     print_last_order = fields.Boolean('Print last receipt', default=0, help='Allow cashiers print last receipt')
@@ -356,7 +355,7 @@ class pos_config(models.Model):
                                          default=0)
     auto_nextscreen_when_validate_payment = fields.Boolean('Auto next screen when cashiers validated payment',
                                                            default=1)
-    auto_print_web_receipt = fields.Boolean('Auto print web receipt', default=1)
+    auto_print_web_receipt = fields.Boolean('Auto Print Web Receipt', default=1)
     multi_lots = fields.Boolean('Multi lots', help='One order line can set many lots')
     create_lots = fields.Boolean('Create lots', help='Allow cashier create lots on pos')
     picking_delayed = fields.Boolean('Picking delayed', help='Allow picking auto create and process by cron job',
@@ -369,6 +368,14 @@ class pos_config(models.Model):
     required_reinstall_cache = fields.Boolean('Required reinstall cache',
                                               help='Check to box if you need when pos session start,\n'
                                                    ' auto reinstall cache')
+    replace_payment_screen = fields.Boolean('Replace Payment Screen', default=0,
+                                            help='If checked, payment screen and products made to one \n'
+                                                 'Keyboard of payment screen will turn off\n'
+                                                 'This future only support on PC, without mobile tablet')
+    auto_reconcile_payments = fields.Boolean('Auto Reconcile Payments', default=0, help='End of day, cashiers need validate and closing sessions. \n'
+                                                                                        'POS Odoo original take longs times for closing\n'
+                                                                                        'If need faster than, check to this option\n'
+                                                                                        'We will open 1 threading auto processing orders of session need closing and post entries')
 
     @api.multi
     def lock_session(self, vals):

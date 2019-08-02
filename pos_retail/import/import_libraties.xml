@@ -31,6 +31,7 @@
 
     <template id="pos_retail_assets" name="pos_retail assets" inherit_id="point_of_sale.assets">
         <xpath expr="." position="inside">
+            <script type="text/javascript" src="/pos_retail/static/src/js/keyboard_guide.js"/>
             <script type="text/javascript" src="/pos_retail/static/src/js/hide_pos_branding.js"/>
             <script type="text/javascript" src="/pos_retail/static/src/js/copyright.js"/>
             <script type="text/javascript" src="/pos_retail/static/src/js/remove_orders_blank.js"/>

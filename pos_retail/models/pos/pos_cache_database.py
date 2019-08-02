@@ -5,6 +5,7 @@ import ast
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 import odoo
 from datetime import datetime, timedelta
+import threading
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -20,25 +21,9 @@ class pos_cache_database(models.Model):
     res_model = fields.Char('Model')
     deleted = fields.Boolean('Deleted', default=0)
 
-    @api.model
-    def create(self, vals):
-        record = super(pos_cache_database, self).create(vals)
-        if record.res_model not in ['pos.order', 'pos.order.line', 'account.invoice', 'account.invoice.line']:
-            record.sync()
-        return record
-
-    @api.model
-    def write(self, vals):
-        res = super(pos_cache_database, self).write(vals)
-        for record in self:
-            if record.res_model not in ['pos.order', 'pos.order.line', 'account.invoice', 'account.invoice.line']:
-                record.sync()
-        return res
-
+    # TODO: When pos session start each table, pos need call this function for get any modifiers from backend
     @api.multi
     def get_modifiers_backend(self, write_date, res_model, config_id=None):
-        _logger.info('BEGIN get_modifiers_backend()')
-        _logger.info('model: %s, last write_date %s and config_id %s' % (res_model, write_date, config_id))
         to_date = datetime.strptime(write_date, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(
             seconds=1)
         to_date = to_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -61,6 +46,34 @@ class pos_cache_database(models.Model):
                     results.append(value)
                     continue
         return results
+
+    # TODO: when cashiers submit order, pos auto call this function for get any modifiers from backend
+    @api.multi
+    def get_modifiers_backend_all_models(self, model_values, config_id=None):
+        threaded_synchronization = threading.Thread(target=self._modifiers_backend_all_models, args=(model_values, config_id))
+        threaded_synchronization.start()
+        return {}
+
+    @api.multi
+    def _modifiers_backend_all_models(self, model_values=[], config_id=False):
+        with api.Environment.manage():
+            new_cr = registry(self._cr.dbname).cursor()
+            self = self.with_env(self.env(cr=new_cr))
+            results = {}
+            for model, write_date in model_values.items():
+                values = self.get_modifiers_backend(write_date, model, config_id)
+                results[model] = values
+            sessions = self.env['pos.session'].sudo().search([
+                ('state', '=', 'opened'),
+                ('config_id', '=', config_id),
+
+            ])
+            for session in sessions:
+                self.env['bus.bus'].sendmany(
+                    [[(self.env.cr.dbname, 'pos.sync.backend', session.user_id.id), results]])
+            new_cr.commit()
+            new_cr.close()
+        return True
 
     @api.model
     def get_onhand_by_product_id(self, product_id):
@@ -211,16 +224,6 @@ class pos_cache_database(models.Model):
         else:
             return None
 
-    @api.model
-    def sync(self):
-        sessions = self.env['pos.session'].sudo().search([
-            ('state', '=', 'opened')
-        ])
-        for session in sessions:
-            self.env['bus.bus'].sendmany(
-                [[(self.env.cr.dbname, 'pos.sync.backend', session.user_id.id), {}]])
-        return True
-
     @api.multi
     def remove_record(self, model, record_id):
         records = self.sudo().search([('res_id', '=', str(record_id)), ('res_model', '=', model)])
@@ -239,8 +242,6 @@ class pos_cache_database(models.Model):
 
     @api.multi
     def save_parameter_models_load(self, model_datas):
-        _logger.info('================== POS SESSION STARTING =====================')
-        _logger.info('================== WE SAVE PARAMETERS OF SOME OBJECT  =======')
         reinstall = False
         for model_name, value in model_datas.items():
             params = self.env['ir.config_parameter'].sudo().get_param(model_name)
@@ -252,11 +253,8 @@ class pos_cache_database(models.Model):
                         self.env['ir.config_parameter'].sudo().set_param(model_name, value)
                         self.env['pos.call.log'].sudo().search([]).unlink()
                         reinstall = True
-                        _logger.info('================== SAVE NEW  ==================')
                 except:
                     pass
             else:
                 self.env['ir.config_parameter'].sudo().set_param(model_name, value)
-                _logger.info('================== NEVER SAVE  ==================')
-        _logger.info('================== END ==================')
         return reinstall

@@ -304,8 +304,10 @@
                 <img id="barcode" class="barcode_receipt oe_hidden"/>
             </t>
             <t t-if="widget.pos.config.display_return_days_receipt">
-                <div class='pos-expire-date' font="b">
-                    Period times return: <t t-esc="widget.pos.config.pos_order_period_return_days"/> days
+                <div class="pos-center-align">
+                    <div class='pos-expire-date' font="b">
+                        Period times return: <t t-esc="widget.pos.config.pos_order_period_return_days"/> days
+                    </div>
                 </div>
             </t>
         </t>

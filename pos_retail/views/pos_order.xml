@@ -63,9 +63,6 @@
                             <field name="sale_id" readonly="1" groups="point_of_sale.group_pos_manager"/>
                         </group>
                     </group>
-                    <group name="mrp" string="Manufacturing order">
-                        <field name="mrp_order_ids" groups="point_of_sale.group_pos_manager" nolabel="1"/>
-                    </group>
                 </xpath>
                 <xpath expr="//field[@name='amount_tax']" position="after">
                     <field name="amount_paid" widget="monetary"/>

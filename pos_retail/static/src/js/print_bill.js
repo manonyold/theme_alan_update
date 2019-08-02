@@ -6,7 +6,15 @@ odoo.define('pos_retail.print_bill', function (require) {
         start: function () {
             var self = this;
             this.$el.click(function () {
-                self.pos.gui.show_screen('receipt_review');
+                var order = self.pos.get_order();
+                if (order && order.orderlines.models.length != 0) {
+                    return self.pos.gui.show_screen('receipt_review');
+                } else {
+                    return self.pos.gui.show_popup('confirm', {
+                        title: 'Warning',
+                        body: 'Your shopping cart is empty'
+                    })
+                }
             });
         },
     });

@@ -163,7 +163,7 @@
                                 </form>
                             </field>
                         </group>
-                        <group string="POS config applied">
+                        <group string="POS applied">
                             <field name="config_ids" nolabel="1" readonly="1"/>
                         </group>
                     </sheet>

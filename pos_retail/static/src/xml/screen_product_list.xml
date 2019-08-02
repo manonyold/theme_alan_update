@@ -44,29 +44,29 @@
             <t t-if="widget.pos.config.product_view == 'list'">
                 <div class='product-list-container'>
                     <div class="categories_list"/>
+                    <div class='payment-screen-container'/>
+                    <div class='receipt-screen-container'/>
                     <div class="product-list-scroller touch-scrollable">
                         <div class="product-list-sale-extra" style="display:none"/>
                         <div class="product-list">
                         </div>
-                         <div class="product-list-scroller touch-scrollable">
-                            <table class="product-list list">
-                                <thead>
-                                    <tr class="header-table">
-                                        <th></th>
-                                        <th><a href="#" class="sort sort_by_product_default_code">Default Code</a></th>
-                                        <th><a href="#" class="sort sort_by_product_name">Name</a></th>
-                                        <th><a href="#" class="sort sort_by_product_list_price">Pub Price</a></th>
-                                        <th><a href="#" class="sort sort_by_product_standard_price">Cost</a></th>
-                                        <th>Price with tax</th>
-                                        <t t-if="widget.pos.config.display_onhand">
-                                            <th><a href="#" class="sort sort_by_product_qty_available">Stock</a></th>
-                                        </t>
-                                    </tr>
-                                </thead>
-                                <tbody class='product-list-contents'>
-                                </tbody>
-                            </table>
-                        </div>
+                        <table class="product-list list">
+                            <thead>
+                                <tr class="header-table">
+                                    <th></th>
+                                    <th><a href="#" class="sort sort_by_product_default_code">Default Code</a></th>
+                                    <th><a href="#" class="sort sort_by_product_name">Name</a></th>
+                                    <th><a href="#" class="sort sort_by_product_list_price">Pub Price</a></th>
+                                    <th><a href="#" class="sort sort_by_product_standard_price">Cost</a></th>
+                                    <th>Price with tax</th>
+                                    <t t-if="widget.pos.config.display_onhand">
+                                        <th><a href="#" class="sort sort_by_product_qty_available">Stock</a></th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody class='product-list-contents'>
+                            </tbody>
+                        </table>
                     </div>
                     <span class="placeholder-ScrollbarWidget" />
                 </div>
@@ -74,6 +74,8 @@
             <t t-if="widget.pos.config.product_view == 'box'">
                 <div class='product-list-container'>
                     <div class="categories_list"/>
+                    <div class='payment-screen-container'/>
+                    <div class='receipt-screen-container'/>
                     <t t-if="widget.pos.config.allow_add_product">
                         <div class="product-list-scroller touch-scrollable">
                             <div class="product-list-sale-extra" style="display:none"/>
@@ -254,70 +256,6 @@
     </t>
 
     <t t-extend="ProductScreenWidget">
-        <t t-jquery="table[class*='layout-table']" t-operation="before">
-            <t t-if="widget.pos.config.quickly_buttons and !widget.pos.config.mobile_responsive">
-                <div class="quickly_buttons">
-                    <t t-if="widget.pos.config.quickly_buttons">
-                        <span class="quickly_icon add_customer">
-                            <div class="button_icon">
-                                <t t-if="widget.pos.config.keyboard_event">
-                                    <span class="button_key">
-                                        a
-                                    </span>
-                                </t>
-                                <img src="/pos_retail/static/src/icons/add_client.png" class="right_pane_logo"/>
-                            </div>
-                        </span>
-                        <t t-if="widget.pos.config.product_operation">
-                            <span class="quickly_icon add_pos_category" title="Add Product category">
-                                <div class="button_icon">
-                                    <t t-if="widget.pos.config.keyboard_event">
-                                        <span class="button_key">
-                                            g
-                                        </span>
-                                    </t>
-                                    <img src="/pos_retail/static/src/icons/categories.png" class="right_pane_logo"/>
-                                </div>
-                            </span>
-                            <span class="quickly_icon add_product">
-                                <div class="button_icon">
-                                    <t t-if="widget.pos.config.keyboard_event">
-                                        <span class="button_key">
-                                            w
-                                        </span>
-                                    </t>
-                                    <img src="/pos_retail/static/src/icons/add_product.png" class="right_pane_logo"/>
-                                </div>
-                            </span>
-                        </t>
-                        <t t-if="widget.pos.config.quickly_payment_full">
-                            <span class="quickly_icon quickly_payment">
-                                <div class="button_icon">
-                                    <t t-if="widget.pos.config.keyboard_event">
-                                        <span class="button_key">
-                                            f
-                                        </span>
-                                    </t>
-                                    <img src="/pos_retail/static/src/icons/payment.png" class="right_pane_logo"/>
-                                </div>
-                            </span>
-                        </t>
-                        <t t-if="widget.pos.config.lock_session">
-                            <span class="quickly_icon lock_session">
-                                <div class="button_icon">
-                                    <t t-if="widget.pos.config.keyboard_event">
-                                        <span class="button_key">
-                                            l
-                                        </span>
-                                    </t>
-                                    <img src="/pos_retail/static/src/icons/lock_screen.png" class="right_pane_logo"/>
-                                </div>
-                            </span>
-                        </t>
-                    </t>
-                </div>
-            </t>
-        </t>
         <t t-jquery="tr[class*='header-row']" t-operation="replace">
             <t t-if="widget.pos.config.allow_add_product">
                 <tr class="header-row">

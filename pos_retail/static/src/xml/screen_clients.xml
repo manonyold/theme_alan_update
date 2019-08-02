@@ -129,10 +129,16 @@
                                 <input class='detail client-email'  name='email'    type='email'    t-att-value='partner.email || ""'></input>
                             </div>
                         </t>
-                        <t t-if="!widget.pos.config.hide_mobile and !widget.pos.config.hide_phone">
+                        <t t-if="!widget.pos.config.hide_phone">
                             <div class='client-detail'>
                                 <span class='label'>Phone</span>
                                 <input class='detail client-phone'  name='phone'    type='tel'      t-att-value='partner.phone || ""'></input>
+                            </div>
+                        </t>
+                        <t t-if="!widget.pos.config.hide_mobile and !widget.pos.config.hide_phone">
+                            <div class='client-detail'>
+                                <span class='label'>Mobile</span>
+                                <input class='detail client-mobile'  name='mobile'    type='mobile'      t-att-value='partner.mobile || ""'></input>
                             </div>
                         </t>
                         <div class='client-detail'>
@@ -184,6 +190,12 @@
             </t>
         </t>
         <t t-jquery="div[class*='client-details-left']" t-operation="append">
+            <t t-if="!widget.pos.config.hide_mobile">
+                <div class='client-detail'>
+                    <span class='label'>Mobile</span>
+                    <span class='detail'><t t-esc='partner.mobile || "N/A"'/></span>
+                </div>
+            </t>
             <t t-if="partner.vat">
                 <div class='client-detail'>
                     <span class='label'>TIN</span>

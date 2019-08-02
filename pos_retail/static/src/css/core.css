@@ -18,12 +18,20 @@
     color: white;
 }
 
+.pos .payment-screen {
+    border-top: dashed 1px gainsboro;
+}
+
 .pos .search_products > input {
     width: 350px;
 }
 
 .pos .price_list {
     color: #393939;
+}
+
+.screen.hide_receipt .right-content.pc60 {
+    left: 0px;
 }
 
 .pos .modal-dialog {
@@ -271,17 +279,20 @@
 }
 
 .pos .pos-branding {
-    width: 590px;
+    width: 540px;
     font-style: normal;
     color: #000000;
     border-right: none;
     overflow-x: auto;
     overflow: hidden;
+    background: #000000;
 }
 
 .pos .amount_total {
-    font-size: 12px;
-    color: #000000;
+    font-size: 25px;
+    color: red;
+    float: right;
+    border-bottom: 1px solid;
 }
 
 .pos .count_item {
@@ -290,7 +301,7 @@
 }
 
 .pos .pos-rightheader {
-    left: 590px;
+    left: 540px;
 }
 
 .pos .hide_branding {
@@ -475,18 +486,18 @@
 
 .pos .order_signature {
     font-size: 16px;
-    color: #000000;
-    margin-left: 10px;
-    width: 150px;
-    text-align: left;
+    width: 50%;
     border-bottom: 1px solid;
-    margin-right: 100px;
-    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.pos .order_signature:hover {
+    background: #6EC89B;
 }
 
 .pos .promotion-label {
     font-size: 16px;
-    color: #E91E63;
+    color: #009688;
     margin-left: 10px;
     width: 200px;
     text-align: left;
@@ -507,27 +518,31 @@
 }
 
 .pos .signature {
-    height: 60px;
-    max-width: 200px;
-    margin-left: -15px;
+    height: 35px;
+    max-width: 100px;
 }
 
 .pos .pos_note {
-    float: left;
-    margin-left: 10px;
+    cursor: pointer;
     font-size: 16px;
-    color: #000000;
+    width: 50%;
+    max-width: 150px !important;
     font-weight: 900;
     border-bottom: 1px solid;
-    margin-right: 100px;
-    margin-bottom: 20px;
-    max-width: 150px;
     text-align: left;
+    overflow: hidden;
 }
+
+
+.pos .pos_note:hover {
+    background: #6EC89B;
+}
+
 
 .pos .order-note {
     font-size: 13px;
     font-weight: 400;
+    color: black;
 }
 
 .pos .line_product_price_quantity {
@@ -833,7 +848,6 @@ select.form-control {
 .ui-menu-item a {
     line-height: 40px;
     font-weight: 400;
-    font-family: 'Roboto', Helvetica, Arial, sans-serif;
     padding: 10px;
     color: blue;
     font-size: 14px;
@@ -941,15 +955,15 @@ select.form-control {
 .pos .notification {
     top: 5px;
     right: 10px;
-    font-size: 20px;
-    background: #e91e63;
+    font-size: 14px;
+    background: #E91E63;
     color: white;
-    min-width: 20px;
+    float: right;
     padding: 0px 5px;
     height: 20px;
     border-radius: 3px;
     text-align: center;
-    line-height: 19px;
+    line-height: 20px;
 }
 
 .pos .notification .amount_total {
@@ -962,9 +976,9 @@ select.form-control {
 }
 
 .pos .orderline_image {
-    width: 15px;
-    padding-right: 5px;
-    border-radius: 20% !important;
+    width: 30px;
+    border-radius: 10px;
+    float: right;
 }
 
 .pos .product_list_image {
@@ -1023,6 +1037,7 @@ select.form-control {
 .screen .left-content.pc40 {
     left: 75%;
     width: 100%;
+    background: #6ec89b;
     top: 0px !important;
     right: 0px;
     border-right: none;
@@ -1036,6 +1051,7 @@ select.form-control {
 .screen .screen-content {
     border-right: none;
     border-left: none;
+    max-width: 100%;
 }
 
 .pos .only_supplier {
@@ -1080,14 +1096,21 @@ select.form-control {
     color: #000000;
 }
 
-/*.pos .paymentlines .label {*/
-/*    color: white !important;*/
-/*}*/
-/*.pos .invoice_journals .label {*/
-/*    color: white !important;*/
-/*}*/
 .pos .payment-screen .top-content {
     display: none;
+}
+
+.pos .paymentlines .label > * {
+    font-size: 14px;
+}
+
+.pos .paymentlines-container {
+    min-height: 50px;
+    margin-left: 10px;
+    margin-top: 10px;
+    background: #fff;
+    margin-right: 25px;
+    padding: 10px;
 }
 
 .pos .paymentlines-container .paymentlines {
@@ -1136,15 +1159,6 @@ select.form-control {
     background-color: rgba(0, 0, 0, 0.2);
     line-height: 13px;
     border-radius: 2px;
-}
-
-.pos .loader-feedback .progressbar {
-    background: slategray;
-}
-
-
-.pos .loader-feedback .progressbar > .progress {
-    background: rgb(110, 200, 155)
 }
 
 .timeline.timeline-simple > li > .timeline-panel {
@@ -1264,8 +1278,8 @@ select.form-control {
     -moz-user-select: none;
     -ms-user-select: none;
     margin-bottom: 5px;
-    background: #00e2ff;
-    color: #000000;
+    background: #009688;
+    color: #fff;
     border-radius: 3px;
     padding-left: 0px;
     padding-right: 0px;
@@ -1303,15 +1317,30 @@ select.form-control {
 .pos .actionpad .button.pay {
     margin-left: 5px;
     margin-right: 5px;
-    max-width: 235px;
+    max-width: 135px;
     font-family: inherit;
     text-transform: uppercase;
-    font-size: 30px;
+    font-size: 15px;
+    font-weight: 900;
     display: inline-block;
-    float: none;
+    float: left;
     height: 135px;
     background: #FFEB3B;
     color: #000000;
+    border-radius: 3px;
+}
+
+.pos .actionpad .button.quickly_paid {
+    max-width: 95px;
+    font-family: inherit;
+    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 900;
+    display: inline-block;
+    float: right;
+    height: 135px;
+    background: red;
+    color: #fff;
     border-radius: 3px;
 }
 
@@ -1356,7 +1385,7 @@ select.form-control {
     line-height: 30px;
     background: linear-gradient(to right bottom, #ffffff, #eeeeee);
     font-size: 14px;
-    border-bottom: 1px solid gray;
+    border-top: 1px solid gray;
 }
 
 .pos .product-list-container .list tr:hover {
@@ -1398,13 +1427,9 @@ select.form-control {
     padding-top: 10px;
 }
 
-.pos .quickly_buttons {
-    padding-left: 5px;
-    margin-top: 10px;
-}
-
 .pos .button-list {
-    background: #aaaaaa;
+    background: inherit;
+    margin-top: 10px;
 }
 
 .pos .quickly_icon_label {
@@ -1451,8 +1476,9 @@ select.form-control {
     padding-top: 4px;
     max-width: 540px;
     height: 45px;
-    background: #000000;
-    border-bottom: 1px solid gray;
+    background: #fff;
+    width: 100%;
+    border-bottom: 1px solid;
 }
 
 .pos .quickly_icon {
@@ -1469,7 +1495,11 @@ select.form-control {
 }
 
 .pos .add_pos_category {
-    background: #393939;
+    background: #FF5722 !important;
+    color: white !important;
+    left: 50%;
+    margin-left: 120px !important;
+
 }
 
 .pos .add_product {
@@ -1572,6 +1602,7 @@ select.form-control {
     width: 60%;
     margin-top: 20px;
     float: left;
+    border-top: dashed 1px gainsboro;
 }
 
 .pos .note_order {
@@ -1677,6 +1708,7 @@ select.form-control {
 .pos .order .orderline {
     padding-bottom: 12px;
     padding-left: 10px;
+    border-top: 1px solid #e2e2e2;
 }
 
 .pos .promotion-line {
@@ -1722,16 +1754,16 @@ select.form-control {
 }
 
 .pos .client-special-info {
-    font-size: 13px;
-    line-height: 12px;
+    border-top: 1px solid gray;
+    font-size: 12px;
+    line-height: 16px;
     float: left;
-    margin-left: 35px;
-    border-left: 1px solid #393939;
-    text-align: left;
+    text-transform: none;
+    width: 100%;
+    margin-left: -3px;
     font-weight: 900;
     height: 15px;
-    padding: 5px;
-    color: #393939;
+    color: red;
 }
 
 .pos .order .orderline .uom_change {
@@ -1743,6 +1775,8 @@ select.form-control {
 
 .pos .order .summary {
     width: 100%;
+    margin-top: 0px;
+    margin-bottom: 0px;
     text-align: right;
     font-weight: bold;
     padding-bottom: 40px;
@@ -1811,7 +1845,7 @@ select.form-control {
     margin-left: 10px;
     height: 32px;
     border-bottom: 0px;
-    padding-top: 20px;
+    margin-top: 30px;
 }
 
 .pos .order-button.selected {
@@ -1864,6 +1898,7 @@ select.form-control {
 .pos .order_logo {
     max-width: 30px;
     max-height: 30px;
+    margin-top: 10px;
 }
 
 .pos .header_logo {
@@ -1876,10 +1911,11 @@ select.form-control {
     margin: 0px;
     padding: 0px;
     color: #000000;
+    margin-left: 2px;
 }
 
 .pos .pos-topheader {
-
+    background: #393939;
 }
 
 .pos .right_pane_logo {
@@ -2066,14 +2102,13 @@ select.form-control {
 
 .pos .pos-branding .username {
     float: left;
-    max-width: 100px;
+    max-width: 40px;
     text-overflow: ellipsis;
     overflow-x: auto;
     text-align: center;
     margin-top: 0px;
     font-size: 14px;
     padding-left: 10px;
-    padding-right: 10px;
     line-height: 48px;
     font-weight: 400;
     color: #ffffff;
@@ -2112,6 +2147,10 @@ select.form-control {
     border: solid 1px rgb(255, 255, 255)
 }
 
+.pos .payment-screen.hide_receipt .pos-sale-ticket {
+    display: none;
+}
+
 .pos .screen p {
     text-align: left;
 }
@@ -2129,7 +2168,7 @@ select.form-control {
 }
 
 .pos .popup-numpad .input-button, .pos .popup-numpad .mode-button {
-    background: #9E9E9E;
+    background: #393939;
     font-size: 20px;
     color: #fff;
     border-radius: 30px;
@@ -2157,7 +2196,7 @@ select.form-control {
 
 
 .pos .shop_logo {
-    min-width: 30px;
+    min-width: 35px;
     padding: 0px !important;
     cursor: pointer;
     max-width: 80px;
@@ -2176,10 +2215,15 @@ select.form-control {
 }
 
 .pos .category_home_icon {
-    max-width: 35px;
+    max-width: 40px;
     border-radius: 3px;
     padding: 3px;
-    height: 35px;
+    height: 40px;
+    background: #fff;
+}
+
+.pos .category_home_icon:hover {
+    background: rgb(110, 200, 155);
 }
 
 .pos .rightpane-header .searchbox {
@@ -2224,16 +2268,16 @@ select.form-control {
 }
 
 .pos .voucher_code {
-    color: #6EC89B;
+    color: #E91E63;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 900;
+    border-bottom: 1px solid;
 }
 
 .pos .promotion_recommend_customer {
     width: 250px;
     border-radius: 3px;
-    margin-left: 10px;
-    background: #e1f0f7;
+    background: #EEEEEE;
 }
 
 .pos .promotion_active {
@@ -2257,10 +2301,6 @@ select.form-control {
     max-width: 200px;
 }
 
-.pos .pos-sale-ticket table td {
-    padding-right: 10px;
-}
-
 .pos .login {
     width: 40%;
 }
@@ -2270,13 +2310,54 @@ select.form-control {
 }
 
 .pos .receipt-screen .centered-content .button {
-    color: #000000;
+    color: #fff;
     background: #6ec89b;
     border: none;
     margin: auto;
     display: block;
     width: 300px;
     text-align: center;
+}
+
+.pos .debug-widget {
+    width: 350px;
+    overflow: hidden;
+    overflow-y: auto;
+    max-height: 1000px;
+}
+
+.pos .debug-widget .category {
+    text-transform: uppercase;
+    color: #FF5722;
+    background: #ffff;
+}
+
+.pos .guide {
+    font-size: 16px;
+    float: right;
+    color: #0e2396;
+    background: #ffffff;
+    border-radius: 3px;
+    width: 90px;
+    text-align: center;
+}
+.pos .debug-widget h1 {
+    text-align: center;
+    color: #FF5722;
+}
+.pos .debug-widget .button {
+    padding: 5px;
+    color: #fff;
+    padding-left: 15px;
+    display: block;
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid gray;
+}
+
+.pos .debug-widget .button:hover {
+    background: #6EC89B;
+    font-weight: 900;
 }
 
 .pos .order-list-scroller {
@@ -2309,28 +2390,25 @@ select.form-control {
 
 .pos .pos-sale-ticket {
     color: #000000;
-    padding-left: 20px;
 }
 
-.pos .loader {
-    background-color: #393939;
-    color: white;
+.pos .receipt-screen .top-content {
+    font-size: 40px !important;
 }
 
-.pos .loader-feedback h1 {
-    color: white;
-    font-size: 30px;
+.pos .receipt-screen .centered-content {
+    margin-top: 100px !important;
 }
 
 .pos .cart_qty {
     position: absolute;
     left: 0;
-    bottom: 0;
-    background: #009688;
+    top: 0;
+    background: #F44336;
     color: white;
-    line-height: 15px;
-    min-width: 15px;
-    max-height: 15px;
+    line-height: 20px;
+    min-width: 20px;
+    max-height: 20px;
     margin-right: 0px;
     text-align: center;
     border-radius: 3px;
@@ -2357,11 +2435,10 @@ select.form-control {
 
 .pos .category-list.simple {
     background: none;
-    padding-top: 10px;
-    padding-bottom: 16px;
     border-bottom: 0px solid;
     margin-left: 10px;
     padding-right: 40px;
+    margin-top: 20px;
 }
 
 .pos .text_logo {
@@ -2500,10 +2577,10 @@ select.form-control {
 }
 
 .pos .show_hide_buttons {
-    background: #3F51B5;
+    background: #FF5722;
     border-radius: 3px;
     float: right;
-    margin: 2px;
+    height: 20px;
     color: black !important;
     padding-left: 22px;
 }
@@ -2541,14 +2618,32 @@ select.form-control {
     font-weight: 600;
 }
 
+.pos .add-new-customer {
+    position: absolute;
+    margin-left: -25px;
+    height: 60px;
+    width: 24px;
+    background: #FF5722;
+    padding: 2px 13px;
+    font-size: 20px;
+    color: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 150ms linear;
+}
+
+.pos .add-new-customer:hover {
+    background: #6ec89b;
+}
+
 .pos .paymentline.selected .edit {
     color: #3F51B5;
 }
 
 .pos .find_customer > input {
-    width: 175px;
+    width: 120px;
+    float: left;
     margin-left: 5px;
-    text-transform: uppercase;
     text-align: center;
     background: url(/point_of_sale/static/src/css/../img/search.png) no-repeat 20px;
     background-color: #ffffff;
@@ -2562,5 +2657,14 @@ select.form-control {
 }
 
 .pos .header-table {
-    border-top: 1px solid !important;
+}
+
+.pos .header-table th {
+    padding: 10px;
+    font-weight: 400;
+    text-align: left;
+    text-transform: uppercase;
+    font-size: 13px;
+    color: black;
+    border-left: 1px solid #000000;
 }

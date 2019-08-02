@@ -6,7 +6,6 @@ from . import product
 from . import res
 from . import sale
 from . import stock
-from . import mrp
 from . import purchase
 
 import odoo

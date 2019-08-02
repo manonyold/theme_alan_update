@@ -33,7 +33,7 @@
                 </xpath>
                 <xpath expr="//sheet" position="inside">
                     <notebook>
-                        <page string="Sync between sessions">
+                        <page string="Sync between Sessions">
                             <group>
                                 <group id="sync_multi_session">
                                     <field name="sync_multi_session"/>
@@ -48,7 +48,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Security pos screen">
+                        <page string="Security">
                             <separator string="Security Rules of cashier"/>
                             <group>
                                 <group>
@@ -132,7 +132,7 @@
                                 <field name="promotion_ids" colspan="4" nolabel="1"/>
                             </group>
                         </page>
-                        <page string="Customer facing screen">
+                        <page string="Customer Facing Screen">
                             <group>
                                 <group>
                                     <field name="is_customer_screen" noabel="1"/>
@@ -180,6 +180,7 @@
                                     <field name="note_order"/>
                                     <field name="signature_order"/>
                                     <field name="set_guest"/>
+                                    <field name="set_guest_when_add_new_order"/>
                                     <field name="allow_set_price_smaller_min_price"/>
                                     <field name="add_customer_before_products_already_in_shopping_cart"/>
                                     <field name="allow_cashier_select_pricelist"/>
@@ -237,7 +238,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Tools tip">
+                        <page string="Tools Tip">
                             <group>
                                 <group>
                                     <field name="tooltip"/>
@@ -265,6 +266,7 @@
                                             var database_template = this.odoo.session_info.db;
                                             for (var i = 0; i &lt; 100; i++) {
                                                 indexedDB.deleteDatabase(database_template + '_' + i);
+                                                console.log('removed db: ' + database_template + '_' + i);
                                             }
                                         }
                                     </script>
@@ -280,6 +282,7 @@
                         <page string="Accounting/Invoice">
                             <group>
                                 <field name="management_invoice"/>
+                                <field name="auto_reconcile_payments"/>
                                 <field name="wallet"/>
                                 <field name="management_session"/>
                                 <field name="invoice_offline"/>
@@ -325,13 +328,13 @@
                         </page>
                         <page string="Sale and Purchase">
                             <group>
-                                <group string="Purchase order">
+                                <group string="Purchase Order">
                                     <field name="create_purchase_order"/>
                                     <field name="create_purchase_order_required_signature"/>
                                     <field name="purchase_order_state"
                                            attrs="{'invisible': [('create_purchase_order', '=', False)], 'required': [('create_purchase_order', '=', True)]}"/>
                                 </group>
-                                <group string="Sale order">
+                                <group string="Sale Order">
                                     <field name="sale_order"/>
                                     <field name="sale_order_auto_confirm"
                                            attrs="{'invisible': [('sale_order', '=', False)]}"/>
@@ -364,25 +367,16 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Products screen">
+                        <page string="Products Screen">
                             <group>
-                                <group string="Quickly actions">
-                                    <field name="quickly_buttons"/>
-                                    <field name="quickly_payment"
-                                           attrs="{'invisible': [('quickly_buttons', '=', False)]}"/>
-                                    <field name="quickly_payment_full"
-                                           attrs="{'invisible': [('quickly_buttons', '=', False)]}"/>
-                                    <field name="quickly_payment_full_journal_id"
-                                           attrs="{'invisible': [('quickly_payment_full', '=', False)], 'required' : [('quickly_payment_full', '=', True)]}"/>
-                                </group>
                                 <group>
-                                    <field name="product_view"
-                                           attrs="{'invisible': [('quickly_buttons', '=', False)]}"/>
-                                    <field name="product_operation"
-                                           attrs="{'invisible': [('quickly_buttons', '=', False)]}"/>
+                                    <field name="product_view"/>
+                                    <field name="product_operation"/>
                                     <field name="active_product_sort_by"/>
                                     <field name="default_product_sort_by"
                                            attrs="{'invisible': [('active_product_sort_by', '=', False)]}"/>
+                                </group>
+                                <group>
                                     <field name="display_sale_price_within_tax"/>
                                     <field name="display_cost_price"/>
                                     <field name="display_product_ref"/>
@@ -390,7 +384,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Clients screen">
+                        <page string="Clients Screen">
                             <group>
                                 <group>
                                     <field name="check_duplicate_email"/>
@@ -412,6 +406,13 @@
                                 </group>
                             </group>
                         </page>
+                        <page string="Quickly Payment">
+                            <group>
+                                <field name="quickly_payment_full"/>
+                                <field name="quickly_payment_full_journal_id"
+                                       attrs="{'invisible': [('quickly_payment_full', '=', False)], 'required' : [('quickly_payment_full', '=', True)]}"/>
+                            </group>
+                        </page>
                         <page string="Extends">
                             <div id="pos_retail">
                                 <group>
@@ -423,7 +424,8 @@
                                         <field name="printer_on_off"/>
                                     </group>
                                     <group>
-                                        <field name="chat"/>
+                                        <field name="chat" invisible="1"/>
+                                        <field name="replace_payment_screen" invisible="1"/>
                                         <field name="change_logo"/>
                                         <field name="switch_user"/>
                                         <field name="keyboard_event"/>

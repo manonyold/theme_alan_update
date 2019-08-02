@@ -13,8 +13,8 @@ odoo.define('pos_retail.hide_pos_branding', function (require) {
         },
         show_pos_branding: function () {
             this.pos.show_branding = !this.pos.show_branding;
-            $('.pos-branding').animate({width: 590}, 'slow');
-            $('.pos-rightheader').animate({left: 590}, 'slow');
+            $('.pos-branding').animate({width: 540}, 'slow');
+            $('.pos-rightheader').animate({left: 540}, 'slow');
             $('.pos-rightheader').removeClass('hide_branding');
             this.pos.set('lock_status', {state: 'connected', pending: 0});
         },

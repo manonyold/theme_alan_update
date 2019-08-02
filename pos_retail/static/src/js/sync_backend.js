@@ -10,7 +10,6 @@ odoo.define('pos_retail.pos_chanel', function (require) {
     exports.pos_sync_backend = Backbone.Model.extend({
         initialize: function (pos) {
             this.pos = pos;
-            this.pos.sync_datas = 0;
         },
         start: function () {
             this.bus = bus.bus;
@@ -22,9 +21,15 @@ odoo.define('pos_retail.pos_chanel', function (require) {
             if (notifications && notifications[0] && notifications[0][1]) {
                 for (var i = 0; i < notifications.length; i++) {
                     var channel = notifications[i][0][1];
-                    if (channel == 'pos.sync.backend' && this.pos.config.big_datas) {
-                        this.pos.sync_datas += 1;
-                        this.pos.set('sync_backend', {state: 'connecting', pending: this.pos.sync_datas});
+                    if (channel == 'pos.sync.backend') {
+                        var values = notifications[i][1];
+                        for (var model in values) {
+                            var vals = values[model];
+                            if (vals.length != 0) {
+                                console.log('-> ' + model + ' sync ' + vals.length + ' rows !');
+                                this.pos.sync_with_backend(model, vals)
+                            }
+                        }
                     }
                 }
             }
@@ -39,48 +44,35 @@ odoo.define('pos_retail.pos_chanel', function (require) {
                 self.set_status(sync_backend.state, sync_backend.pending);
             });
             this.$el.click(function () {
-                var sync_datas = self.pos.sync_datas;
-                if (sync_datas) {
-                    var list_model = [
-                        'sale.order',
-                        'sale.order.line',
-                        'product.product',
-                        'res.partner',
-                        'pos.order',
-                        'pos.order.line',
-                        'account.invoice',
-                        'account.invoice.line',
-                    ];
-                    for (index in list_model) {
-                        self.pos.get_modifiers_backend(list_model[index]);
-                    }
-                    self.pos.sync_datas = 0;
+                var list_model = [
+                    'sale.order',
+                    'sale.order.line',
+                    'product.product',
+                    'res.partner',
+                    'pos.order',
+                    'pos.order.line',
+                    'account.invoice',
+                    'account.invoice.line',
+                ];
+                self.pos.get_modifiers_backend_all_models(list_model).done(function () {
                     self.pos.set('sync_backend', {state: 'connected', pending: 0});
-                } else {
-                    return self.pos.gui.show_popup('dialog', {
-                        title: 'Alert',
-                        body: 'Nothing datas sync with backend'
-                    });
-                }
+                });
             });
         },
     });
 
     chrome.Chrome.include({
         build_widgets: function () {
-            this.widgets.push(
-                {
-                    'name': 'sync_backend_status',
-                    'widget': sync_backend_status,
-                    'append': '.pos-branding'
-                }
-            );
-            this._super();
-            for (var model in this.pos.init_sync_datas) {
-                var results = this.pos.init_sync_datas[model];
-                this.pos.sync_with_backend(model, results);
+            if (this.pos.config.big_datas) {
+                this.widgets.push(
+                    {
+                        'name': 'sync_backend_status',
+                        'widget': sync_backend_status,
+                        'append': '.pos-branding'
+                    }
+                );
             }
-            this.pos.init_sync_datas = {};
+            this._super();
         }
     });
 
@@ -89,18 +81,33 @@ odoo.define('pos_retail.pos_chanel', function (require) {
         load_server_data: function () {
             var self = this;
             return _super_PosModel.load_server_data.apply(this, arguments).then(function () {
-                self.pos_sync_backend = new exports.pos_sync_backend(self);
-                self.pos_sync_backend.start();
+                if (self.config.big_datas) {
+                    self.pos_sync_backend = new exports.pos_sync_backend(self);
+                    self.pos_sync_backend.start();
+                }
                 return true;
             })
         },
-        sync_with_backend: function (model, datas) {
-            datas = this.db.filter_datas_notifications_with_current_date(model, datas);
+        sync_with_backend: function (model, datas, dont_check_write_time) {
+            // -----------------------------------------------------------
+            // -------------------- We blocked this code -----------------
+            // -----------------------------------------------------------
+            // if (!dont_check_write_time || dont_check_write_time == undefined) {
+            //     datas = this.db.filter_datas_notifications_with_current_date(model, datas);
+            // }
+            // -----------------------------------------------------------
+            // -----------------------------------------------------------
+            // -----------------------------------------------------------
+            var self = this;
+            $('.loader').animate({opacity: 1,}, 200, 'swing', function () {
+                $('.loader').removeClass('oe_hidden');
+                $('.loader-feedback').removeClass('oe_hidden');
+                self.chrome.loading_message(('Waiting few seconds, pos auto sync ' + datas.length + ' of model: ' + model), 0.9);
+            });
             if (datas.length == 0) {
                 console.warn('Data sync is old times. Reject:' + model);
                 return false;
             }
-            console.log('New from model:' + model);
             this.db.set_last_write_date_by_model(model, datas);
             if (model == 'pos.order') {
                 this.db.save_pos_orders(datas);
@@ -156,6 +163,12 @@ odoo.define('pos_retail.pos_chanel', function (require) {
                     }
                 }
             }
+            this.chrome.loading_message('Sync done !');
+            $('.loader').animate({opacity: 0,}, 200, 'swing', function () {
+                $('.loader').addClass('oe_hidden');
+                $('.loader-feedback').addClass('oe_hidden');
+
+            });
         },
         remove_partner_deleted_outof_orders: function (partner_id) {
             var orders = this.get('orders').models;
@@ -174,9 +187,7 @@ odoo.define('pos_retail.pos_chanel', function (require) {
             var self = this;
             var res = _super_PosModel._save_to_server.call(this, orders, options);
             res.done(function (order_ids) {
-                if (order_ids && order_ids.length) {
-                    self.sync_datas += 1;
-                    self.set('sync_backend', {state: 'connecting', pending: self.sync_datas});
+                if (order_ids.length && self.config.big_datas) {
                     self.gui.chrome.widget['sync_backend_status'].el.click();
                 }
             });

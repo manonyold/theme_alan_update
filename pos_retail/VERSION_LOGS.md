@@ -125,4 +125,23 @@
 
 - [x] Only load order have config id the same config (session start)
 - [x] when payment order and have promotion active , if auto apply, no show popup (because made receipt print viva web is wrong)
-- [x] Fixed sale multi units base one product, auto covert stock move and account move line 
+- [x] Fixed sale multi units base one product, auto covert stock move and account move line
+
+***7.3.6.0***
+- [x] Hide quickly actions
+- [x] Add payment screen to product screen 
+- [X] Add pos fast reconcile
+
+***7.3.6.1***
+- [x] Only one query backend when submit order
+- [x] Remove any reference to mrp 
+
+***7.4.0.0***
+- [x] Remove sync stock, only sync when push orders
+- [x] Remove sync backend, use threading push
+- [x] Fixing calling printer voucher
+- [x] On one order allow use many voucher
+- [x] Remove 2 buttons: Note and Signature
+- [x] Improve keyboard Shortcut
+- [x] From any screens, back to products screen, add event keyboard back
+- [x] Turn off sync when big datas field is unchecked

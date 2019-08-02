@@ -4,6 +4,5 @@ from . import pos_order_line
 from . import product_barcode
 from . import product_uom_price
 from . import product_variant
-from . import pos_manufacturing_report
 from . import sale_order_line_insert
 from . import product

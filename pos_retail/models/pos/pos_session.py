@@ -1,14 +1,55 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, tools, _
+from odoo import api, fields, models, tools, _, registry
 from odoo.exceptions import UserError
 from odoo import SUPERUSER_ID
-import json
-
+import threading
+import timeit
 import logging
+
 _logger = logging.getLogger(__name__)
 
 class pos_session(models.Model):
     _inherit = "pos.session"
+
+    state = fields.Selection(selection_add=[
+        ('processing_to_close', 'Processing to Close')
+    ])
+
+    @api.multi
+    def action_pos_session_validate(self):
+        for session in self:
+            if session.state == 'processing_to_close' and self.env.user.id != 1:
+                raise UserError('Action processing, please stop click it. Only admin can try ')
+            session._check_pos_session_balance()
+            if not session.config_id.auto_reconcile_payments:
+                session.action_pos_session_close()
+                session.write({
+                    'state': 'closed'
+                })
+            else:
+                session.write({
+                    'state': 'processing_to_close'
+                })
+                self.env.cr.commit()
+                threaded_synchronization = threading.Thread(target=self.auto_action_pos_session_close, args=([], session.id))
+                threaded_synchronization.start()
+        return True
+
+    @api.multi
+    def auto_action_pos_session_close(self, order_ids=[], session_id=False):
+        with api.Environment.manage():
+            new_cr = registry(self._cr.dbname).cursor()
+            self = self.with_env(self.env(cr=new_cr))
+            start = timeit.default_timer()
+            session = self.browse(session_id)
+            session.action_pos_session_close()
+            stop = timeit.default_timer()
+            session.write({
+                'state': 'closed'
+            })
+            _logger.info('================ Total times run auto_action_pos_session_close %s ===============' % (stop - start))
+            new_cr.commit()
+            new_cr.close()
 
     def _confirm_orders(self):
         # We're have not solution how to break out order with status partial_payment

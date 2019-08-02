@@ -59,7 +59,9 @@
     <t t-name="popup_create_product">
         <div class="modal-dialog">
             <div class="popup touch-scrollable scrollable-y" style="max-height: 600px;min-height: 300px;height: fit-content;">
-                <p class="title"><t t-esc="widget.title"/></p>
+                <t t-if="widget.title">
+                    <p class="title"><t t-esc="widget.title"/></p>
+                </t>
                 <div class="content">
                     <div class="container-fluid">
                         <div class="row">
@@ -132,7 +134,6 @@
         </div>
     </t>
 
-
     <t t-name="popup_update_quantity_each_location">
         <div class="modal-dialog">
             <div class="popup touch-scrollable scrollable-y" style="max-height: 600px;min-height: 300px;height: fit-content;">
@@ -171,6 +172,9 @@
                         <span class='search-clear'></span>
                     </span>
                     <span class='searchbox'></span>
+                    <span class="button add_pos_category">
+                        <i class="fa fa-plus"></i>
+                    </span>
                     <span class='button new-product'>
                         Add new Product
                     </span>

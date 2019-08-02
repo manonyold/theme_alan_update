@@ -28,7 +28,6 @@ class pos_order(models.Model):
     return_order_id = fields.Many2one('pos.order', 'Return of order')
     email = fields.Char('Email')
     email_invoice = fields.Boolean('Email invoice')
-    mrp_order_ids = fields.One2many('mrp.production', 'pos_id', 'Manufacturing orders', readonly=1)
     plus_point = fields.Float(compute="_get_point", styring='Plus point')
     redeem_point = fields.Float(compute="_get_point", styring='Redeem point')
     signature = fields.Binary('Signature', readonly=1)
@@ -336,6 +335,7 @@ class pos_order(models.Model):
 
     @api.model
     def create_from_ui(self, orders):
+        _logger.info('BEGIN create_from_ui %s' % self.env.user.login)
         order_to_invoice = []
         for o in orders:
             data = o['data']
@@ -375,7 +375,6 @@ class pos_order(models.Model):
             order.pos_compute_loyalty_point()
             self.create_picking_with_multi_variant(orders, order)
             self.create_picking_combo(orders, order)
-            self.pos_made_manufacturing_order(order)
             """
                 * auto send email and receipt to customers
             """
@@ -435,23 +434,6 @@ class pos_order(models.Model):
             _logger.info("Created picking for order ean13: %s" % (order.ean13))
         return True
 
-    @api.multi
-    def auto_invoice(self, order_id, order_ids=[]):
-        with api.Environment.manage():
-            """
-                * auto create invoice
-            """
-            new_cr = registry(self._cr.dbname).cursor()
-            self = self.with_env(self.env(cr=new_cr))
-            pos_order = self.browse(order_id)
-            pos_order.action_pos_order_invoice()
-            pos_order.invoice_id.sudo().action_invoice_open()
-            pos_order.account_move = pos_order.invoice_id.move_id
-            if pos_order.config_id.auto_register_payment:
-                pos_order.pos_order_auto_invoice_reconcile()
-            new_cr.commit()
-            new_cr.close()
-        return True
 
     @api.multi
     def auto_auto_register_payment_invoice(self, order_id, order_ids=[]):
@@ -465,70 +447,6 @@ class pos_order(models.Model):
             pos_order.pos_order_auto_invoice_reconcile()
             new_cr.commit()
             new_cr.close()
-        return True
-
-    def pos_made_manufacturing_order(self, order):
-        """
-            * pos create mrp order
-            * if have bill of material config for product
-        """
-        version_info = odoo.release.version_info
-        for line in order.lines:
-            product_template = line.product_id.product_tmpl_id
-            if not product_template.manufacturing_out_of_stock:
-                continue
-            else:
-                mrp_orders = self.env['mrp.production'].sudo().search([('name', '=', order.name)])
-                if mrp_orders or not order.session_id.config_id.stock_location_id:
-                    continue
-                else:
-                    quantity_available = 0
-                    bom = product_template.bom_id
-                    product_id = line.product_id.id
-                    location_id = order.session_id.config_id.stock_location_id.id
-                    quants = self.env['stock.quant'].search(
-                        [('product_id', '=', product_id), ('location_id', '=', location_id)])
-                    if quants:
-                        quantity_available = 0
-                        if version_info and version_info[0] in [11, 12]:
-                            quantity_available = sum([q.quantity for q in quants])
-                        if version_info and version_info[0] == 10:
-                            quantity_available = sum([q.qty for q in quants])
-                    pos_min_qty = product_template.pos_min_qty
-                    if quantity_available <= pos_min_qty:
-                        pos_manufacturing_quantity = product_template.pos_manufacturing_quantity
-                        vals = {
-                            'name': self.name,
-                            'product_id': line.product_id.id,
-                            'product_qty': pos_manufacturing_quantity,
-                            'bom_id': bom.id,
-                            'product_uom_id': bom.product_uom_id.id if bom.product_uom_id else line.product_id.uom_id.id,
-                            'pos_id': self.id,
-                            'origin': self.name,
-                            'pos_user_id': self.env.user.id,
-                        }
-                        try:
-                            mrp_order = self.env['mrp.production'].create(vals)
-                            if product_template.manufacturing_state == 'manual':
-                                mrp_order.action_assign()
-                            if product_template.manufacturing_state == 'auto':
-                                mrp_order.action_assign()
-                                mrp_order.button_plan()
-                                work_orders = self.env['mrp.workorder'].search([('production_id', '=', mrp_order.id)])
-                                if work_orders:
-                                    work_orders.button_start()
-                                    work_orders.record_production()
-                                else:
-                                    produce_wizard = self.env['mrp.product.produce'].with_context({
-                                        'active_id': mrp_order.id,
-                                        'active_ids': [mrp_order.id],
-                                    }).create({
-                                        'product_qty': pos_manufacturing_quantity,
-                                    })
-                                    produce_wizard.do_produce()
-                                mrp_order.button_mark_done()
-                        except:
-                            continue
         return True
 
     def pos_compute_loyalty_point(self):
@@ -831,15 +749,10 @@ class pos_order_line(models.Model):
                 line.purchase_price = 0
                 line.margin = 0
             else:
-                if line.uom_id and line.uom_id.id != line.product_id.uom_id.id:
-                    purchase_price = line.product_id.standard_price
-                    line.purchase_price = line.product_id.uom_id._compute_price(purchase_price, line.uom_id)
-                    line.margin = line.price_subtotal - (
-                            line.purchase_price * line.qty)
-                else:
-                    line.purchase_price = line.product_id.standard_price
-                    line.margin = line.price_subtotal - (
-                            line.product_id.standard_price * line.qty)
+                line.purchase_price = line.product_id.standard_price
+                line.margin = line.price_subtotal - (
+                        line.product_id.standard_price * line.qty)
+
 
     @api.model
     def create(self, vals):
@@ -872,16 +785,8 @@ class pos_order_line(models.Model):
                 'source': order.name,
                 'pos_order_line_id': po_line.id
             })
-
         if po_line.product_id.is_credit:
             po_line.order_id.add_credit(po_line.price_subtotal_incl)
-        if po_line.uom_id and po_line.uom_id.id != po_line.product_id.uom_id.id:
-            price_subtotal = po_line.price_subtotal
-            qty_coverted = po_line.qty * po_line.uom_id.factor_inv / po_line.product_id.uom_id.factor_inv
-            po_line.write({
-                'qty': qty_coverted,
-                'price_unit': price_subtotal / qty_coverted
-            })
         self.env['pos.cache.database'].insert_data(self._inherit, po_line.id)
         return po_line
 

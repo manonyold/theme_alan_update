@@ -16,7 +16,7 @@
 
 .pos .ribbon span {
     font-size: 10px;
-    color: #E91E63;
+    color: #FF5722;
     text-transform: uppercase;
     text-align: center;
     line-height: 20px;
@@ -26,9 +26,9 @@
     font-weight: 400;
     font-size: 12px;
     display: block;
-    border-bottom: 1px solid;
+    border-bottom: 1px solid gray;
     position: absolute;
-    top: 45px;
+    top: 37px;
     left: -35px;
 }
 

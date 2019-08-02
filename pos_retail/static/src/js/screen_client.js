@@ -48,7 +48,7 @@ odoo.define('pos_retail.screen_client_list', function (require) {
                 contents.appendChild(clientline);
             }
         },
-        display_client_details: function (visibility, partner, clickpos) {
+        display_client_details: function (visibility, partner, clickpos) { // TODO: we add input type date to box birth day of client edit
             this._super(visibility, partner, clickpos);
             this.$('.datepicker').datetimepicker({
                 format: 'YYYY-MM-DD',
@@ -241,70 +241,26 @@ odoo.define('pos_retail.screen_client_list', function (require) {
             });
             if (this.pos.config.check_duplicate_email && fields['email']) {
                 if (id) {
-                    var old_partners = _.filter(this.pos.db.partners, function (partner_check) {
-                        return partner_check['id'] != id && partner_check['email'] == fields['email'];
-                    });
-                    if (old_partners.length != 0) {
-                        return this.pos.gui.show_popup('dialog', {
-                            title: 'Warning',
-                            body: 'Email is duplicated with other customer' + old_partners[0]['name']
-                        })
-                    }
+                    this.pos._check_unique_email(fields['email'], id)
                 } else {
-                    var old_partners = _.filter(this.pos.db.partners, function (partner_check) {
-                        return partner_check['email'] == fields['email'];
-                    });
-                    if (old_partners.length != 0) {
-                        return this.pos.gui.show_popup('dialog', {
-                            title: 'Warning',
-                            body: 'Email is duplicated with other customer' + old_partners[0]['name']
-                        })
-                    }
+                    this.pos._check_unique_email(fields['email'])
                 }
             }
             if (this.pos.config.check_duplicate_phone && fields['phone']) {
                 if (id) {
-                    var old_partners = _.filter(this.pos.db.partners, function (partner_check) {
-                        return partner_check['id'] != id && partner_check['phone'] == fields['phone'];
-                    });
-                    if (old_partners.length != 0) {
-                        return this.pos.gui.show_popup('dialog', {
-                            title: 'Warning',
-                            body: 'Phone have used before, your phone input of other client ' + old_partners[0]['name']
-                        })
-                    }
+                    this.pos._check_unique_phone(fields['phone'], id)
                 } else {
-                    var old_partners = _.filter(this.pos.db.partners, function (partner_check) {
-                        return partner_check['phone'] == fields['phone'];
-                    });
-                    if (old_partners.length != 0) {
-                        return this.pos.gui.show_popup('dialog', {
-                            title: 'Warning',
-                            body: 'Phone have used before, your phone input of other client ' + old_partners[0]['name']
-                        })
-                    }
+                    this.pos._check_unique_phone(fields['phone'])
+                }
+            }
+            if (this.pos.config.check_duplicate_phone && fields['mobile']) {
+                if (id) {
+                    this.pos._check_unique_phone(fields['mobile'], id)
+                } else {
+                    this.pos._check_unique_phone(fields['mobile'])
                 }
             }
             return this._super(partner);
-        },
-        saved_client_details: function (partner_id) {
-            var self = this;
-            this.reload_partners().then(function () {
-                var partner = self.pos.db.get_partner_by_id(partner_id);
-                if (partner) {
-                    self.new_client = partner;
-                    self.toggle_save_button();
-                    self.display_client_details('show', partner);
-                } else {
-                    // should never happen, because create_from_ui must return the id of the partner it
-                    // has created, and reload_partner() must have loaded the newly created partner.
-                    self.display_client_details('hide');
-                }
-            }).always(function () {
-                $(".client-details-contents").on('click', '.button.save', function () {
-                    self.save_client_details(self.new_client);
-                });
-            });
         },
     });
 

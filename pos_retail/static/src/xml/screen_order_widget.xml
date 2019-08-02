@@ -12,17 +12,16 @@
         <t t-jquery="button[t-attf-class*='button set-customer']" t-operation="replace">
             <t t-if="widget.pos.config.allow_customer">
                 <div class="find_customer">
-                    <input autocomplete="off" class="ui-autocomplete-input find_partner_input" id="find_partner_id" placeholder="Partner phone"/>
+                    <input autocomplete="off" class="ui-autocomplete-input find_partner_input" id="find_partner_id"
+                           placeholder="Partner phone" t-attf-style='#{ widget.pos.config.add_client == false ? "width: 175px" : ""} '/>
+                    <span class="add-new-customer" t-attf-style='#{ widget.pos.config.add_client == false ? "display: none" : ""} '>
+                        <i class="fa fa-user"></i>
+                        <i class="fa fa-plus"></i>
+                    </span>
                 </div>
             </t>
             <t t-if="widget.pos.config.allow_customer">
                 <button t-attf-class='button set-customer #{ ( widget.pos.get_client() and widget.pos.get_client().name.length > 10) ? "decentered" : "" }'>
-                    <t t-if="widget.pos.config.keyboard_event">
-                        <span class="button_key" style="float:right">
-                            <i class="fa fa-keyboard"></i>
-                            c
-                        </span>
-                    </t>
                     <t t-if="widget.pos.get_client()">
                         <t t-esc="widget.pos.get_client().name"/>
                     </t>
@@ -34,11 +33,6 @@
             <t t-if="!widget.pos.config.allow_customer">
                 <button t-attf-class='button set-customer #{ ( widget.pos.get_client() and widget.pos.get_client().name.length > 10) ? "decentered" : "" }'
                         style="display:none">
-                    <t t-if="widget.pos.config.keyboard_event">
-                        <span class="button_key">
-                            c
-                        </span>
-                    </t>
                     <t t-if="!widget.pos.get_client()">
                         Customer
                     </t>
@@ -47,13 +41,8 @@
         </t>
         <t t-jquery="button[class*='pay']" t-operation="replace">
             <t t-if="widget.pos.config.allow_payment">
-                <button class='button pay'>
+                <button class='button pay' t-attf-style='#{ widget.pos.config.quickly_payment_full == false ? "max-width: 235px" : ""} '>
                     Payment
-                    <t t-if="widget.pos.config.keyboard_event">
-                        <span class="button_key">
-                            Space
-                        </span>
-                    </t>
                     <t t-set="client" t-value="widget.pos.get_client()"/>
                     <t t-if="client">
                         <t t-if="client.balance">
@@ -68,7 +57,7 @@
                         </t>
                         <t t-if="client.pos_loyalty_point">
                             <li class="client-special-info">
-                                Point: <t t-esc="client.pos_loyalty_point"/>
+                                Point: <t t-esc="widget.format_currency_no_symbol(client.pos_loyalty_point)"/>
                             </li>
                         </t>
 
@@ -78,11 +67,11 @@
             <t t-if="!widget.pos.config.allow_payment">
                 <button class='button pay' style="display:none">
                     Payment
-                    <t t-if="widget.pos.config.keyboard_event">
-                        <span class="button_key">
-                            Space
-                        </span>
-                    </t>
+                </button>
+            </t>
+            <t t-if="widget.pos.config.quickly_payment_full">
+                <button class='button quickly_paid'>
+                    Payment Full
                 </button>
             </t>
         </t>
@@ -152,7 +141,11 @@
                 <t t-if="line.get_product_price_quantity_item()">
                     <span class="line_product_price_quantity">
                         <t t-set="product_price_quantity" t-value="line.get_product_price_quantity_item()"/>
-                        <i class="fa fa-certificate"/> Added rule: Bought <t t-esc="product_price_quantity['quantity']"/> with price <t t-esc="widget.format_currency(product_price_quantity['price_unit'])"/>
+                        <i class="fa fa-certificate"/>
+                        Added rule: Bought
+                        <t t-esc="product_price_quantity['quantity']"/>
+                        with price
+                        <t t-esc="widget.format_currency(product_price_quantity['price_unit'])"/>
                     </span>
                 </t>
                 <t t-if="line.combo_items">
@@ -225,7 +218,10 @@
                         <t t-foreach="line.lot_ids" t-as="lot">
                             <li class="info">
                                 <i class="oe_link_icon fa fa-list oe_icon line-lot-icon oe_green"></i>
-                                Lot name <t t-esc="lot.name"/> with qty: <t t-esc="lot.quantity"/>
+                                Lot name
+                                <t t-esc="lot.name"/>
+                                with qty:
+                                <t t-esc="lot.quantity"/>
                             </li>
                         </t>
                     </ul>
@@ -253,6 +249,11 @@
                         </li>
                     </ul>
                 </t>
+            </t>
+            <t t-if="line.product.is_voucher">
+                <span class="icon_line" title="Edit Voucher Card">
+                    <img src="/pos_retail/static/src/icons/voucher.png" class="icon_line_logo edit_voucher_card"/>
+                </span>
             </t>
             <t t-if="!line.product.is_voucher and line.selected">
                 <li class="info">
@@ -342,26 +343,21 @@
 
     <t t-extend="OrderWidget">
         <t t-jquery="div[class*='order-scroller touch-scrollable']" t-operation="before">
-            <div class="header_order">
-                <div class="header_order_widget_logo js_proxy">
-                    <div class="js_connected oe_icon ">
-                        <img src="/pos_retail/static/src/icons/shopping_cart_header.png" class="order_logo"/>
-                        <span class="notification set_total_items">0</span>
-                    </div>
-                </div>
-                <div class="header_order_widget_logo js_proxy">
-                    <div class="js_connected oe_icon ">
-                        <img src="/pos_retail/static/src/icons/gift_header.png" class="order_logo"/>
-                        <span class="notification total_gift">0</span>
-                    </div>
-                </div>
-                <div class="header_order_widget_logo js_proxy total_amount">
-                    <div class="js_connected oe_icon ">
-                        <img src="/pos_retail/static/src/icons/amount_total.png" class="order_logo"/>
-                        <span class="notification amount_total">0</span>
-                    </div>
-                </div>
-            </div>
+            <table class="header_order">
+                <thead>
+                    <tr class="header-table">
+                        <th>
+                            Total Items: <span class="set_total_items">0</span>
+                        </th>
+                        <th>
+                            Gift: <span class="total_gift">0</span>
+                        </th>
+                        <th>
+                            Amount Total: <span class="amount_total">0</span>
+                        </th>
+                    </tr>
+                </thead>
+            </table>
         </t>
         <t t-jquery="div[class*='line']" t-operation="replace">
             <div t-attf-class='line #{ widget.pos.config.hide_amount_total ? "oe_hidden" : ""}'>
@@ -393,16 +389,30 @@
                         </t>
                     </div>
                 </t>
-                <div class="pos_note">
-                    Note: <span class="order-note"/>
-                </div>
-                <t t-if="widget.pos.config.signature_order">
-                    <div class="order_signature">
-                        Signature:
-                        <img class="product-img signature"
-                             src=""
-                        />
-                    </div>
+                <t t-if="widget.pos.config.note_order or widget.pos.config.signature_order">
+                    <table>
+                        <thead>
+                            <tr class="header-loyalty">
+                                <th class="pos_note">
+                                    <t t-if="widget.pos.config.note_order">
+                                        <div>
+                                            Note: <span class="order-note"/>
+                                        </div>
+                                    </t>
+                                </th>
+                                <th class="order_signature">
+                                     <t t-if="widget.pos.config.signature_order">
+                                        <div>
+                                            Signature:
+                                            <img class="product-img signature"
+                                                 src=""
+                                            />
+                                        </div>
+                                    </t>
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
                 </t>
             </t>
         </t>

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, models, fields, registry
-import json
 import logging
-import threading
 
 _logger = logging.getLogger(__name__)
 

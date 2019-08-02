@@ -13,43 +13,44 @@
     </t>
 
     <t t-extend="OrderWidget">
-        <t t-jquery=".summary" t-operation="append">
+        <t t-jquery="div[class*='order-scroller touch-scrollable']" t-operation="before">
             <t t-if="widget.pos.loyalty and widget.pos.get_order()">
-                <div class="loyalty">
-                    <div class="loyalty-label">
-                        Points summary:
-                    </div>
-                    <div class="loyalty_redeem_point">
-                        Client point
-                        <span class='value client_point'>
-                            <t t-esc="widget.pos.get_order().get_client_point()['client_point']"/>
-                        </span>
-                    </div>
-                    <div class="loyalty_redeem_point">
-                        Redeem
-                        <span class='value redeem_point'>
-                            - <t t-esc="widget.pos.get_order().get_client_point()['redeem_point']"/>
-                        </span>
-                    </div>
-                    <div class='loyalty_remaining_point'>
-                        Remaining:
-                        <span class='value remaining_point'>
-                            = <t t-esc="widget.pos.get_order().get_client_point()['remaining_point']"/>
-                        </span>
-                    </div>
-                    <div class="loyalty_plus_point">
-                        Plus
-                        <span class='value plus_point'>
-                            + <t t-esc="widget.pos.get_order().get_client_point()['plus_point']"/>
-                        </span>
-                    </div>
-                    <div class='loyalty_next_point'>
-                        Next point
-                        <span class='value next_point'>
-                            = <t t-esc="widget.pos.get_order().get_client_point()['next_point']"/>
-                        </span>
-                    </div>
-                </div>
+                <table class="loyalty-table">
+                    <thead>
+                        <tr class="header-loyalty">
+                            <th>
+                                Client Point
+                                <span class='value client_point'>
+                                    <t t-esc="widget.format_currency_no_symbol(widget.pos.get_order().get_client_point()['client_point'])"/>
+                                </span>
+                            </th>
+                            <th>
+                                Redeem
+                                 <span class='value redeem_point'>
+                                   - <t t-esc="widget.format_currency_no_symbol(widget.pos.get_order().get_client_point()['redeem_point'])"/>
+                                </span>
+                            </th>
+                            <th>
+                                Remaining
+                                <span class='value remaining_point'>
+                                    = <t t-esc="widget.format_currency_no_symbol(widget.pos.get_order().get_client_point()['remaining_point'])"/>
+                                </span>
+                            </th>
+                            <th>
+                                Plus
+                                <span class='value plus_point'>
+                                    + <t t-esc="widget.format_currency_no_symbol(widget.pos.get_order().get_client_point()['plus_point'])"/>
+                                </span>
+                            </th>
+                            <th>
+                                Next Point
+                                <span class='value next_point'>
+                                    = <t t-esc="widget.format_currency_no_symbol(widget.pos.get_order().get_client_point()['next_point'])"/>
+                                </span>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
             </t>
         </t>
     </t>
@@ -83,18 +84,20 @@
 
     <t t-extend="PosTicket">
         <t t-jquery=".receipt-change" t-operation="after">
-            <table>
-                <t t-if="order.plus_point">
-                    <td class="pos-right-align point">
-                        Point plus: <t t-esc="order.plus_point.toFixed(2)"/>
-                    </td>
-                </t>
-                <t t-if="order.redeem_point">
-                    <td class="pos-right-align point">
-                        Point redeem: <t t-esc="order.redeem_point.toFixed(2)"/>
-                    </td>
-                </t>
-            </table>
+            <t t-if="order.plus_point">
+                <div class="pos-center-align">
+                        <div class='pos-expire-date' font="b">
+                        Point Plus: <t t-esc="order.plus_point.toFixed(2)"/>
+                    </div>
+                </div>
+            </t>
+            <t t-if="order.redeem_point">
+                <div class="pos-center-align">
+                        <div class='pos-expire-date' font="b">
+                        Point Redeem: <t t-esc="order.redeem_point.toFixed(2)"/>
+                    </div>
+                </div>
+            </t>
         </t>
     </t>
 
@@ -115,22 +118,22 @@
         </t>
     </t>
 
-<!--    <t t-extend="Orderline">-->
-<!--        <t t-jquery="ul[class*='info-list']:first .info" t-operation="append">-->
-<!--            <t t-if="line.plus_point">-->
-<!--                <img src="/pos_retail/static/src/icons/medal.png" class="order_line_logo"/>-->
-<!--                <span class="line_plus_point">-->
-<!--                    + <t t-esc="line.plus_point" /> (point)-->
-<!--                </span>-->
-<!--            </t>-->
-<!--            <t t-if="line.redeem_point">-->
-<!--                <img src="/pos_retail/static/src/icons/medal.png" class="order_line_logo"/>-->
-<!--                <span class="line_redeem_point">-->
-<!--                    <t t-esc="line.redeem_point" /> (point)-->
-<!--                </span>-->
-<!--            </t>-->
-<!--        </t>-->
-<!--    </t>  only single app-->
+    <!--    <t t-extend="Orderline">-->
+    <!--        <t t-jquery="ul[class*='info-list']:first .info" t-operation="append">-->
+    <!--            <t t-if="line.plus_point">-->
+    <!--                <img src="/pos_retail/static/src/icons/medal.png" class="order_line_logo"/>-->
+    <!--                <span class="line_plus_point">-->
+    <!--                    + <t t-esc="line.plus_point" /> (point)-->
+    <!--                </span>-->
+    <!--            </t>-->
+    <!--            <t t-if="line.redeem_point">-->
+    <!--                <img src="/pos_retail/static/src/icons/medal.png" class="order_line_logo"/>-->
+    <!--                <span class="line_redeem_point">-->
+    <!--                    <t t-esc="line.redeem_point" /> (point)-->
+    <!--                </span>-->
+    <!--            </t>-->
+    <!--        </t>-->
+    <!--    </t>  only single app-->
 
 
 </templates>

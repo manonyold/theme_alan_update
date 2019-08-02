@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from datetime import datetime
 import logging
-import ast
 
 _logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class res_partner(models.Model):
     pos_loyalty_type = fields.Many2one('pos.loyalty.category', 'Type', help='Customer type of loyalty program')
     discount_id = fields.Many2one('pos.global.discount', 'Pos discount', help='Discount (%) automatic apply for this customer')
     birthday_date = fields.Date('Birthday date')
-    group_ids = fields.Many2many('res.partner.group', 'res_partner_group_rel', 'partner_id', 'group_id', string='Groups')
+    group_ids = fields.Many2many('res.partner.group', 'res_partner_group_rel', 'partner_id', 'group_id', string='Groups Name')
 
     @api.model
     def create_from_ui(self, partner):

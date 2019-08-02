@@ -338,6 +338,11 @@ odoo.define('pos_retail.screen_products_operation', function (require) {
             this.$('.searchbox .search-product').click(function () {
                 self.clear_search();
             });
+            this.$('.add_pos_category').click(function () { // quickly add product
+                self.pos.gui.show_popup('popup_create_pos_category', {
+                    title: 'Add New Product Category'
+                })
+            });
             this.$('.sort_by_product_operation_id').click(function () {
                 var products = self.pos.db.get_product_by_category(0).sort(self.pos.sort_by('id', self.reverse, parseInt));
                 self.render_list(products);

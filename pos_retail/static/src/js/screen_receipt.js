@@ -149,11 +149,26 @@ odoo.define('pos_retail.screen_receipt', function (require) {
             this.pos.posbox_report_xml = receipt;
         },
         auto_next_screen: function () {
-            if (this.pos.config.auto_nextscreen_when_validate_payment && !this.pos.config.iface_print_via_proxy) {
-                if (this.pos.config.auto_print_web_receipt) {
-                    this.print_web();
+            var self = this;
+            if (this.pos.config.iface_print_via_proxy) {
+                return;
+            } else {
+                if (this.pos.config.auto_nextscreen_when_validate_payment) {
+                    if (this.pos.config.auto_print_web_receipt) {
+                        setTimeout(function () {
+                            self.print_web();
+                            self.pos.get_order().finalize();
+                        }, 500) // TODO: wating 1 second for pos render barcode
+                    } else {
+                        this.pos.get_order().finalize();
+                    }
+                } else {
+                    if (this.pos.config.auto_print_web_receipt) {
+                        setTimeout(function () {
+                            self.print_web();
+                        }, 500) // TODO: wating 1 second for pos render barcode
+                    }
                 }
-                this.pos.get_order().finalize();
             }
         },
         print_xml: function () {

@@ -327,13 +327,6 @@ odoo.define('pos_retail.promotion', function (require) {
                     }
                 }
             }
-            if (total_removed > 0) {
-                this.pos.gui.show_popup('dialog', {
-                    title: 'Done',
-                    body: 'Total promotion lines: ' + total_removed + ' has removed',
-                    color: 'success'
-                })
-            }
         },
         product_quantity_by_product_id: function () {
             var lines_list = {};

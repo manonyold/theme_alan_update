@@ -107,6 +107,8 @@ odoo.define('pos_retail.screen_payment', function (require) {
                             $('.paid_full').click();
                         } else if (event.keyCode == 112) {  // p: partial paid
                             $('.paid_partial').click();
+                        } else if (event.keyCode == 98) {  // b: back screen
+                            self.gui.back();
                         } else if (event.keyCode == 99) { // c: customer
                             $('.js_set_customer').click();
                         } else if (event.keyCode == 105) { // i: invoice
@@ -525,6 +527,16 @@ odoo.define('pos_retail.screen_payment', function (require) {
                     })
                 }
             });
+            // this.$('.back').click(function () {
+            //     if (self.pos.config.replace_payment_screen && !self.pos.mobile_responsive) {
+            //         $('.product-list-scroller').removeClass('oe_hidden');
+            //         $('.screen').removeClass('hide_receipt');
+            //         $('.payment-screen').removeClass('hide_receipt');
+            //         self.pos.gui.screen_instances['products'].rerender_products_screen(self.pos.gui.chrome.widget["products_view_widget"].view_type);
+            //         $('.payment-screen-container').addClass('oe_hidden');
+            //         self.hide();
+            //     }
+            // });
         },
         add_currency_to_payment_line: function (line) {
             var order = this.pos.get_order();
@@ -595,6 +607,23 @@ odoo.define('pos_retail.screen_payment', function (require) {
                         body: 'Credit amount of customer have only ' + this.pos.chrome.format_currency(client['balance']) + '. You can set payment line amount bigger than ' + this.pos.chrome.format_currency(client['balance'])
                     })
                 }
+            }
+            var total_payment = 0;
+            if (order.paymentlines.models.length == 0) {
+                return this.pos.gui.show_popup('dialog', {
+                    title: 'Error',
+                    body: 'Have not payment lines'
+                })
+            }
+            for (var i = 0; i < order.paymentlines.models.length; i++) {
+                var payment_line = order.paymentlines.models[i];
+                total_payment += payment_line.amount;
+            }
+            if ((order.export_as_JSON()['amount_total'] - total_payment) > 0.00001) {
+                return this.pos.gui.show_popup('dialog', {
+                    title: 'Error',
+                    body: 'Have difference payment amount with total amount, difference bigger than 0.00001'
+                })
             }
             var res = this._super(force_validation);
             return res;

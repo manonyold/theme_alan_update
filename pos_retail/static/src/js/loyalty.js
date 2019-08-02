@@ -7,7 +7,7 @@ odoo.define('pos_retail.loyalty', function (require) {
     var round_pr = utils.round_precision;
     var models = require('point_of_sale.models');
     var screens = require('point_of_sale.screens');
-    var model_retail = require('pos_retail.order')
+    var model_retail = require('pos_retail.order');
 
     var _super_PosModel = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
@@ -23,7 +23,10 @@ odoo.define('pos_retail.loyalty', function (require) {
             for (var i = 0; i < orders.length; i++) {
                 var order = orders[i];
                 if ((order.data.plus_point || order.data.redeem_point) && order.data.partner_id) {
-                    var customer = this.db.get_partner_by_id(order.data.partner_id)
+                    var customer = this.db.get_partner_by_id(order.data.partner_id);
+                    if (!customer) {
+                        continue;
+                    }
                     if (order.data.plus_point != undefined) {
                         customer['pos_loyalty_point'] += order.data.plus_point;
                     }
@@ -40,7 +43,7 @@ odoo.define('pos_retail.loyalty', function (require) {
     var reward_button = screens.ActionButtonWidget.extend({
         template: 'reward_button',
         set_redeem_point: function (line, new_price, point) {
-            line.redeem_point = round_pr(point, this.pos.loyalty.rounding)
+            line.redeem_point = round_pr(point, this.pos.loyalty.rounding);
             line.plus_point = 0;
             if (new_price != null) {
                 line.price = new_price;
@@ -55,9 +58,11 @@ odoo.define('pos_retail.loyalty', function (require) {
             var order = self.pos.get('selectedOrder');
             var client = order.get_client();
             if (!client) {
-                return setTimeout(function () {
-                    self.pos.gui.show_screen('clientlist');
-                }, 1);
+                this.pos.gui.show_popup('dialog', {
+                    title: 'Warning',
+                    body: 'Please add client the first before choice reward program'
+                });
+                return this.pos.gui.show_screen('clientlist');
             }
             for (var i = 0; i < this.pos.rewards.length; i++) {
                 var item = this.pos.rewards[i];
@@ -68,7 +73,7 @@ odoo.define('pos_retail.loyalty', function (require) {
             }
             if (list.length > 0) {
                 this.gui.show_popup('selection', {
-                    title: _t('Please select Reward program'),
+                    title: _t('Points of Client: ' + client['pos_loyalty_point']),
                     list: list,
                     confirm: function (reward) {
                         var loyalty = self.pos.loyalty;
@@ -317,7 +322,7 @@ odoo.define('pos_retail.loyalty', function (require) {
                 return total_point;
             }
             var rules = [];
-            var rules_by_loylaty_id = this.pos.rules_by_loyalty_id[loyalty.id]
+            var rules_by_loylaty_id = this.pos.rules_by_loyalty_id[loyalty.id];
             if (!rules_by_loylaty_id) {
                 return total_point;
             }
@@ -328,7 +333,7 @@ odoo.define('pos_retail.loyalty', function (require) {
                 return total_point;
             }
             if (rules.length) {
-                for (var j = 0; j < lines.length; j++) {
+                for (var j = 0; j < lines.length; j++) { // TODO: reset plus point each line
                     var line = lines[j];
                     line.plus_point = 0;
                 }
@@ -341,9 +346,8 @@ odoo.define('pos_retail.loyalty', function (require) {
                         line.plus_point = 0;
                         for (var i = 0; i < rules.length; i++) {
                             var rule = rules[i];
-                            var line_plus_point = line.get_price_with_tax() * rule['coefficient'];
+                            var plus_point = line.compute_all([], line.get_price_with_tax(), rule['coefficient'], this.pos.loyalty.rounding, false)['total_excluded'];
                             if ((rule['type'] == 'products' && rule['product_ids'].indexOf(line.product['id']) != -1) || (rule['type'] == 'categories' && rule['category_ids'].indexOf(line.product.pos_categ_id[0]) != -1) || (rule['type'] == 'order_amount')) {
-                                var plus_point = round_pr(line_plus_point, this.pos.loyalty.rounding);
                                 if (line.is_return) {
                                     plus_point = -plus_point
                                 }
@@ -389,20 +393,16 @@ odoo.define('pos_retail.loyalty', function (require) {
                 }
             }
             var redeem_point = this.build_redeem_point();
-            var redeem_point_rounded = round_pr(redeem_point, this.pos.loyalty.rounding);
             var plus_point = this.build_plus_point();
-            var plus_point_rounded = round_pr(plus_point, this.pos.loyalty.rounding);
             var pos_loyalty_point = client.pos_loyalty_point || 0;
             var remaining_point = pos_loyalty_point - redeem_point;
-            var remaining_point_rounded = round_pr(remaining_point, this.pos.loyalty.rounding);
             var next_point = pos_loyalty_point - redeem_point + plus_point;
-            var next_point_rounded = round_pr(next_point, this.pos.loyalty.rounding);
             return {
-                redeem_point: redeem_point_rounded,
-                plus_point: plus_point_rounded,
+                redeem_point: redeem_point,
+                plus_point: plus_point,
                 pos_loyalty_point: pos_loyalty_point,
-                remaining_point: remaining_point_rounded,
-                next_point: next_point_rounded,
+                remaining_point: remaining_point,
+                next_point: next_point,
                 client_point: pos_loyalty_point,
             }
         }
@@ -448,13 +448,10 @@ odoo.define('pos_retail.loyalty', function (require) {
             if (selected_order && selected_order.is_return) {
                 return buttons.reward_button.highlight(false);
             }
-            var $loyalty_element = $(this.el).find('.summary .loyalty');
+            var $loyalty_element = $(this.el).find('.loyalty-table');
             var lines = selected_order.orderlines.models;
             if (!lines || lines.length == 0) {
-                $loyalty_element.addClass('oe_hidden');
-                if (buttons && buttons.reward_button) {
-                    buttons.reward_button.highlight(false);
-                }
+                buttons.reward_button.highlight(false);
             } else {
                 var client = selected_order.get_client();
                 var $plus_point = this.el.querySelector('.plus_point');
@@ -463,21 +460,24 @@ odoo.define('pos_retail.loyalty', function (require) {
                 var $client_point = this.el.querySelector('.client_point');
                 var $next_point = this.el.querySelector('.next_point');
                 if (client) {
+                    $loyalty_element.animate({opacity: 1,}, 200, 'swing', function () {
+                        $loyalty_element.removeClass('oe_hidden');
+                    });
                     var points = selected_order.get_client_point();
                     if ($plus_point) {
-                        $plus_point.textContent = points['plus_point'].toFixed(2);
+                        $plus_point.textContent = this.format_currency_no_symbol(points['plus_point']);
                     }
                     if ($redeem_point) {
-                        $redeem_point.textContent = points['redeem_point'].toFixed(2);
+                        $redeem_point.textContent = this.format_currency_no_symbol(points['redeem_point']);
                     }
                     if ($client_point) {
-                        $client_point.textContent = points['client_point'].toFixed(2);
+                        $client_point.textContent = this.format_currency_no_symbol(points['client_point']);
                     }
                     if ($remaining_point) {
-                        $remaining_point.textContent = points['remaining_point'].toFixed(2);
+                        $remaining_point.textContent = this.format_currency_no_symbol(points['remaining_point']);
                     }
                     if ($next_point) {
-                        $next_point.textContent = points['next_point'].toFixed(2);
+                        $next_point.textContent = this.format_currency_no_symbol(points['next_point']);
                     }
                     selected_order.plus_point = points['plus_point'];
                     selected_order.redeem_point = points['redeem_point'];
@@ -487,6 +487,8 @@ odoo.define('pos_retail.loyalty', function (require) {
                     } else if (client['pos_loyalty_point'] <= points['redeem_point'] && buttons && buttons.reward_button) {
                         buttons.reward_button.highlight(false);
                     }
+                } else {
+                    buttons.reward_button.highlight(false);
                 }
             }
         },
@@ -494,7 +496,7 @@ odoo.define('pos_retail.loyalty', function (require) {
             this._super();
             var buttons = this.getParent().action_buttons;
             var order = this.pos.get_order();
-            if (order && buttons && this.pos.loyalty) {
+            if (order && buttons && buttons.reward_button && this.pos.loyalty) {
                 this.active_loyalty(buttons, order);
             }
         }

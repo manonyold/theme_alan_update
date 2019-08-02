@@ -89,15 +89,32 @@ odoo.define('pos_retail.screens', function (require) {
                 $('.pos .pos-rightheader').css('left', '0px');
             } else {
                 $('.pos-branding').removeClass('oe_hidden');
-                $('.pos .pos-rightheader').css('left', '590px');
+                $('.pos .pos-rightheader').css('left', '540px');
             }
-            return this._super(screen_name, params, refresh, skip_close_popup);
+            var res = this._super(screen_name, params, refresh, skip_close_popup);
+            var products_screen = this.screen_instances['products'];
+            if (!products_screen) {
+                return res;
+            } else {
+                var order_widget = products_screen.order_widget;
+                if (!order_widget) {
+                    console.error('could not find order widget');
+                    return res;
+                }
+                if (screen_name == 'products') {
+                    order_widget.add_event_keyboard();
+                    order_widget.event_input_linked_keyboard_event();
+                } else {
+                    order_widget.remove_event_keyboard();
+                }
+            }
+            return res;
         }
     });
 
     screens.NumpadWidget.include({
         hide_pad: function () {
-            $('.pads').animate({height: 0}, 'fast');
+            $('.subwindow-container-fix .pads').animate({height: 0}, 'fast');
             $('.numpad').addClass('oe_hidden');
             $('.show_hide_pad').toggleClass('fa-caret-down fa-caret-up');
             $('.actionpad').addClass('oe_hidden');
@@ -105,7 +122,7 @@ odoo.define('pos_retail.screens', function (require) {
             this.pos.hide_pads = true;
         },
         show_pad: function () {
-            $('.pads').animate({height: '100%'}, 'fast');
+            $('.subwindow-container-fix .pads').animate({height: '100%'}, 'fast');
             $('.mode-button').removeClass('oe_hidden');
             $('.actionpad').removeClass('oe_hidden');
             $('.pads').animate({height: '100%'}, 'fast');
@@ -338,7 +355,6 @@ odoo.define('pos_retail.screens', function (require) {
                 $('.find_customer').replaceWith();
                 $('.full-content').css("top", '10px');
                 $('.show_hide_buttons').remove();
-                $('.quickly_buttons').remove();
                 $('.layout-table').replaceWith();
                 $('.buttons_pane').replaceWith();
                 $('.collapsed').replaceWith();
@@ -467,9 +483,84 @@ odoo.define('pos_retail.screens', function (require) {
         renderElement: function () {
             var self = this;
             this._super();
+            this.$('.add-new-customer').click(function () {
+                self.pos.gui.show_popup('popup_create_customer', {
+                    title: 'Add customer'
+                })
+            });
+            this.$('.quickly_paid').click(function () {
+                if (!self.pos.config.quickly_payment_full_journal_id) {
+                    return;
+                }
+                var order = self.pos.get_order();
+                if (!order) {
+                    return;
+                }
+                if (order.orderlines.length == 0) {
+                    return self.pos.gui.show_popup('dialog', {
+                        title: 'Error',
+                        body: 'Your order lines is blank'
+                    })
+                }
+                var paymentlines = order.get_paymentlines();
+                for (var i = 0; i < paymentlines.length; i++) {
+                    paymentlines[i].destroy();
+                }
+                var register = _.find(self.pos.cashregisters, function (register) {
+                    return register['journal']['id'] == self.pos.config.quickly_payment_full_journal_id[0];
+                });
+                if (!register) {
+                    return self.pos.gui.show_popup('dialog', {
+                        title: 'Error',
+                        body: 'Your config not add quickly payment method, please add before use'
+                    })
+                }
+                var amount_due = order.get_due();
+                order.add_paymentline(register);
+                var selected_paymentline = order.selected_paymentline;
+                selected_paymentline.set_amount(amount_due);
+                order.initialize_validation_date();
+                self.pos.push_order(order);
+                self.pos.gui.show_screen('receipt');
+
+            });
             this.$('.pay').click(function () {
                 var order = self.pos.get_order();
                 order.validate_payment_order();
+                // if (self.pos.config.replace_payment_screen && !self.pos.mobile_responsive && order.orderlines.models.length) {
+                //     var payment_screen = new screens.PaymentScreenWidget(self, {});
+                //     payment_screen.replace($('.payment-screen-container'));
+                //     payment_screen.show(); // add keyboard event
+                //     $( "input" ).prop( "disabled", true );
+                //     $(".pos .pad").css( {"pointer-events": "none"});
+                //     $(".pos .pads .numpad").css( {"pointer-events": "none"});
+                //     // $(".header-row").addClass("oe_hidden");
+                //     $(".orderline").css( {"pointer-events": "none"});
+                //     $(".pos .actionpad button").css( {"pointer-events": "none"});
+                //     $(".pos .actionpad span").css( {"pointer-events": "none"});
+                //     $('.screen').addClass('hide_receipt');
+                //     $('.payment-screen').addClass('hide_receipt');
+                //     $('.product-list-scroller').addClass('oe_hidden');
+                //     $('.buttons_pane').animate({width: '0px'}, 'fast');
+                //     $('.pos .rightpane').animate({left: '540px'}, 'fast');
+                //     self.gui.show_screen('products');
+                //     $('.back_products_screen').click(function () {
+                //         $(".pos .pad").css( {"pointer-events": "auto"});
+                //         $(".pos .pads .numpad").css( {"pointer-events": "auto"});
+                //         // $(".header-row").removeClass("oe_hidden");
+                //         $(".orderline").css( {"pointer-events": "auto"});
+                //         $(".pos .actionpad button").css( {"pointer-events": "auto"});
+                //         $(".pos .actionpad span").css( {"pointer-events": "auto"});
+                //         $('.product-list-scroller').removeClass('oe_hidden');
+                //         $('.screen').removeClass('hide_receipt');
+                //         $('.payment-screen').removeClass('hide_receipt');
+                //         $('.buttons_pane').animate({width: '220px'}, 'fast');
+                //         $('.pos .rightpane').animate({left: '740px'}, 'fast');
+                //         self.pos.gui.screen_instances['products'].rerender_products_screen(self.pos.gui.chrome.widget["products_view_widget"].view_type);
+                //         $('.payment-screen-container').addClass('oe_hidden');
+                //         payment_screen.hide();
+                //     })
+                // }
             });
         }
     });

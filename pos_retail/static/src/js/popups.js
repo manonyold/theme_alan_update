@@ -44,20 +44,20 @@ odoo.define('pos_retail.popups', function (require) {
                             if (self.combo_items[i].id == combo_item.id) {
                                 self.combo_items.splice(i, 1);
                                 if (combo_item['price_extra']) {
-                                var price_with_tax = selected_orderline.get_price_with_tax();
-                                var price_unit = selected_orderline.get_unit_price();
-                                if (price_unit * selected_orderline.get_quantity() == price_with_tax) {
-                                    var price_taxes = selected_orderline.get_price_included_tax_by_price_of_item(combo_item['price_extra'], combo_item['quantity']);
-                                    var new_price = price_with_tax - (price_taxes['priceWithTax'] * combo_item['quantity'] * selected_orderline.get_quantity());
-                                    var price_apply = selected_orderline.get_price_included_tax_by_price_of_item(new_price, 1)['priceWithTax'] / selected_orderline.get_quantity();
-                                    selected_orderline.set_unit_price(price_apply);
-                                } else {
-                                    var price_unit = selected_orderline.get_price_without_tax();
-                                    var price_apply = (price_unit - (combo_item['price_extra'] * combo_item['quantity'] * selected_orderline.get_quantity())) / selected_orderline.get_quantity();
-                                    selected_orderline.set_unit_price(price_apply);
-                                }
+                                    var price_with_tax = selected_orderline.get_price_with_tax();
+                                    var price_unit = selected_orderline.get_unit_price();
+                                    if (price_unit * selected_orderline.get_quantity() == price_with_tax) {
+                                        var price_taxes = selected_orderline.get_price_included_tax_by_price_of_item(combo_item['price_extra'], combo_item['quantity']);
+                                        var new_price = price_with_tax - (price_taxes['priceWithTax'] * combo_item['quantity'] * selected_orderline.get_quantity());
+                                        var price_apply = selected_orderline.get_price_included_tax_by_price_of_item(new_price, 1)['priceWithTax'] / selected_orderline.get_quantity();
+                                        selected_orderline.set_unit_price(price_apply);
+                                    } else {
+                                        var price_unit = selected_orderline.get_price_without_tax();
+                                        var price_apply = (price_unit - (combo_item['price_extra'] * combo_item['quantity'] * selected_orderline.get_quantity())) / selected_orderline.get_quantity();
+                                        selected_orderline.set_unit_price(price_apply);
+                                    }
 
-                            }
+                                }
                                 selected_orderline.trigger('change', selected_orderline);
                                 selected_orderline.trigger('trigger_update_line');
                             }
@@ -1118,8 +1118,24 @@ odoo.define('pos_retail.popups', function (require) {
                     method: 'create',
                     args: [fields]
                 }).then(function (partner_id) {
-                    console.log('{partner_id} created : ' + partner_id);
-                    return true;
+                    var pushing = self.pos._search_read_by_model_and_id('res.partner', [partner_id])
+                    pushing.done(function (datas) {
+                        if (datas.length == 0) {
+                            return;
+                        }
+                        self.pos.sync_with_backend('res.partner', datas, true);
+                        var partner_id = datas[0]['id'];
+                        var client = self.pos.db.get_partner_by_id(partner_id);
+                        var order = self.pos.get_order();
+                        if (client && order) {
+                            order.set_client(client);
+                            self.pos.gui.show_popup('dialog', {
+                                title: 'Great job',
+                                body: 'Set ' + client['name'] + ' to current order',
+                                color: 'success'
+                            })
+                        }
+                    })
                 }, function (type, err) {
                     if (err.code && err.code == 200 && err.data && err.data.message && err.data.name) {
                         self.pos.gui.show_popup('dialog', {

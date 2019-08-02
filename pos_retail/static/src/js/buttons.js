@@ -27,7 +27,7 @@ odoo.define('pos_retail.buttons', function (require) {
                         var order = self.pos.get_order();
                         order['seller'] = seller;
                         var orderlines = order.orderlines.models;
-                        for (var i=0; i < orderlines.length; i++) {
+                        for (var i = 0; i < orderlines.length; i++) {
                             var line = orderlines[i];
                             line.set_sale_person(seller);
                         }
@@ -375,50 +375,6 @@ odoo.define('pos_retail.buttons', function (require) {
         'condition': function () {
             return this.pos.config.multi_variant;
         },
-    });
-
-    var button_order_signature = screens.ActionButtonWidget.extend({
-        template: 'button_order_signature',
-        button_click: function () {
-            var order = this.pos.get_order();
-            if (order) {
-                this.gui.show_popup('popup_order_signature', {
-                    order: order,
-                    title: 'Signature'
-                });
-            }
-        }
-    });
-    screens.define_action_button({
-        'name': 'button_order_signature',
-        'widget': button_order_signature,
-        'condition': function () {
-            return this.pos.config.signature_order;
-        }
-    });
-
-    var button_order_note = screens.ActionButtonWidget.extend({
-        template: 'button_order_note',
-        button_click: function () {
-            var order = this.pos.get_order();
-            if (order) {
-                this.gui.show_popup('textarea', {
-                    title: _t('Add Note'),
-                    value: order.get_note(),
-                    confirm: function (note) {
-                        order.set_note(note);
-                        order.trigger('change', order);
-                    }
-                });
-            }
-        }
-    });
-    screens.define_action_button({
-        'name': 'button_order_note',
-        'widget': button_order_note,
-        'condition': function () {
-            return this.pos.config.note_order;
-        }
     });
 
     var button_line_note = screens.ActionButtonWidget.extend({
@@ -818,12 +774,21 @@ odoo.define('pos_retail.buttons', function (require) {
             });
         },
         init: function (parent, options) {
+            var self = this;
             this._super(parent, options);
             this.pos.bind('change:guest', function () {
                 this.renderElement();
                 var order = this.pos.get_order();
                 order.trigger('change', order);
             }, this);
+            if (this.pos.config.set_guest_when_add_new_order) {
+                this.pos.get('orders').bind('add', function () {
+                    setTimeout(function () {
+                        self.button_click()
+                    }, 1000);
+
+                }, this);
+            }
         },
     });
 

@@ -50,7 +50,7 @@
     color: black !important;
 }
 .pos.dark .icon_line_logo {
-    background: #000000 !important;
+    background: #fff !important;
     color: white !important;
 }
 .pos.dark .product-list-container .list tr {
@@ -78,9 +78,6 @@
 .pos.dark .receipt-screen .centered-content .button {
     background: white !important;
     color: #000000 !important;
-}
-.pos.dark .header_order {
-    background: #000000;
 }
 .pos.dark .actionpad .button.set-customer:hover {
    background: #6EC89B;

@@ -212,12 +212,12 @@
             </t>
             <div font='b'>
                 <t t-if='company'>
-                    <div><t t-esc='company.contact_address' /></div>
+                    <div>Adress:<t t-esc='company.contact_address' /></div>
                     <div>Tel:<t t-esc='company.phone'/></div>
                     <div>VAT:<t t-esc='company.vat'/></div>
-                    <div><t t-esc='company.email' /></div>
-                    <div><t t-esc='company.website' /></div>
-                    <div><t t-esc='shop.name' /></div>
+                    <div>Email:<t t-esc='company.email' /></div>
+                    <div>Website: <t t-esc='company.website' /></div>
+                    <div>Shop: <t t-esc='shop.name' /></div>
                 </t>
                 <div>--------------------------------</div>
                 <t t-if='cashier'>
@@ -259,7 +259,7 @@
                 </t>
                 <t t-if="voucher.end_date">
                     <div class='cashier'>
-                        <div>Expiry date of voucher:  <t t-esc='voucher.end_date'/></div>
+                        <div>Expired date after:  <t t-esc='voucher.end_date'/></div>
                     </div>
                 </t>
                 <div class='cashier'>
@@ -267,17 +267,6 @@
                 </div>
             </div>
             <br/>
-        </div>
-    </t>
-
-    <t t-name="button_create_voucher">
-        <div class="left_button">
-            <div class="button-icon">
-                <img src="/pos_retail/static/src/icons/voucher.png" class="pos_logo"/>
-            </div>
-            <div class="button-name">
-                Edit Voucher
-            </div>
         </div>
     </t>
 

@@ -92,7 +92,7 @@
                 <img src="/pos_retail/static/src/icons/lot.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Add lot combo items
+                Add Lot Combo Items
             </div>
         </div>
     </t>
@@ -114,7 +114,7 @@
                 <img src="/pos_retail/static/src/icons/lock_order.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Lock order
+                Lock Order
             </div>
         </div>
     </t>
@@ -126,39 +126,6 @@
             </div>
             <div class="button-name">
                 Change Unit
-            </div>
-        </div>
-    </t>
-
-    <t t-name="button_line_note">
-        <div class="left_button">
-            <div class="button-icon">
-                <img src="/pos_retail/static/src/icons/note.png" class="pos_logo"/>
-            </div>
-            <div class="button-name">
-                Add Line Note
-            </div>
-        </div>
-    </t>
-
-    <t t-name="button_order_note">
-        <div class="left_button">
-            <div class="button-icon">
-                <img src="/pos_retail/static/src/icons/note.png" class="pos_logo"/>
-            </div>
-            <div class="button-name">
-                Add Order Note
-            </div>
-        </div>
-    </t>
-
-    <t t-name="button_order_signature">
-        <div class="left_button">
-            <div class="button-icon">
-                <img src="/pos_retail/static/src/icons/signature.png" class="pos_logo"/>
-            </div>
-            <div class="button-name">
-                Signature order
             </div>
         </div>
     </t>
@@ -180,7 +147,7 @@
                 <img src="/pos_retail/static/src/icons/bill.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Print bill last order
+                Print Bill Last Order
             </div>
         </div>
     </t>
@@ -191,7 +158,7 @@
                 <img src="/pos_retail/static/src/icons/checklist.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Add variants
+                Add Variants
             </div>
         </div>
     </t>
@@ -202,7 +169,7 @@
                 <img src="/pos_retail/static/src/icons/trash.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Remove variants
+                Remove Variants
             </div>
         </div>
     </t>
@@ -213,7 +180,7 @@
                 <img src="/pos_retail/static/src/icons/register_payment.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Register payment
+                Register Payment
             </div>
         </div>
     </t>
@@ -224,7 +191,7 @@
                 <img src="/pos_retail/static/src/icons/tag.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Add tags
+                Add Tags
             </div>
         </div>
     </t>
@@ -235,7 +202,7 @@
                 <img src="/pos_retail/static/src/icons/refund.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Fast return
+                Fast Return
             </div>
         </div>
     </t>
@@ -325,7 +292,7 @@
                 <img src="/pos_retail/static/src/icons/id_card.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Print user card
+                Print User Card
             </div>
         </div>
     </t>
@@ -336,7 +303,7 @@
                 <img src="/pos_retail/static/src/icons/trash.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Clean empty order
+                Clean Empty Order
             </div>
         </div>
     </t>
@@ -347,7 +314,7 @@
                 <img src="/pos_retail/static/src/icons/lock_screen.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Lock session
+                Lock Session
             </div>
         </div>
     </t>
@@ -382,7 +349,7 @@
                 <img src="/pos_retail/static/src/icons/warehouse.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Qty available selected line
+                Qty Available of Selected Line
             </div>
         </div>
     </t>
@@ -409,13 +376,13 @@
                         <t t-esc="widget.pos.get_order().get_medical_insurance().employee"/>
                     </t>
                     <t t-if="!widget.pos.get_order().get_medical_insurance()">
-                        Add insurance
+                        Add Insurance
                     </t>
                 </div>
             </t>
             <t t-if="!widget.pos.get_order()">
                 <div class="button-name">
-                    Add insurance
+                    Add Insurance
                 </div>
             </t>
         </div>
@@ -461,7 +428,7 @@
                 <img src="/pos_retail/static/src/icons/taxes.png" class="pos_logo"/>
             </div>
             <div class="button-name">
-                Change taxes
+                Change Taxes
             </div>
         </div>
     </t>
@@ -486,7 +453,7 @@
                     <img src="/pos_retail/static/src/icons/printer.png" class="pos_logo"/>
                 </div>
                 <div class="button-name">
-                    Turn on printer
+                    Turn on Printer
                 </div>
             </div>
         </t>
@@ -497,7 +464,7 @@
                     <img src="/pos_retail/static/src/icons/printer.png" class="pos_logo"/>
                 </div>
                 <div class="button-name">
-                    Turn off printer
+                    Turn off Printer
                 </div>
             </div>
         </t>

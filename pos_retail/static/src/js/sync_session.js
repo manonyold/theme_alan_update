@@ -156,7 +156,6 @@ odoo.define('pos_retail.synchronization', function (require) {
     //                 });
     //             }
     //             if (self.pos.config.lock_order_printed_receipt) {
-    //                 self.gui.screen_instances['products'].order_widget.remove_event_keyboard();
     //                 return self.pos.gui.show_popup('confirm', {
     //                     title: _t('Are you want print receipt?'),
     //                     body: 'If POS-BOX(printer) is ready config IP, please check receipt at printer, else if POS-BOX and printer not ready will go to Receipt Screen',
@@ -178,7 +177,6 @@ odoo.define('pos_retail.synchronization', function (require) {
     //                     }
     //                 });
     //             } else {
-    //                 self.gui.screen_instances['products'].order_widget.remove_event_keyboard()
     //                 return self.pos.gui.show_screen('receipt_review');
     //             }
     //         });

@@ -209,18 +209,6 @@ odoo.define('pos_retail.big_data', function (require) {
             },
         },
         {
-            label: 'syncing products',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'product.product',
-            loaded: function (self) {
-                var model = 'product.product';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
-            },
-        },
-        {
             label: 'partners',
             condition: function (self) {
                 return self.config.big_datas;
@@ -231,18 +219,6 @@ odoo.define('pos_retail.big_data', function (require) {
                     status.resolve()
                 });
                 return status;
-            },
-        },
-        {
-            label: 'syncing partners',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'res.partner',
-            loaded: function (self) {
-                var model = 'res.partner';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
             },
         },
         {
@@ -259,18 +235,6 @@ odoo.define('pos_retail.big_data', function (require) {
             },
         },
         {
-            label: 'syncing invoices',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'account.invoice',
-            loaded: function (self) {
-                var model = 'account.invoice';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
-            },
-        },
-        {
             label: 'invoice lines',
             condition: function (self) {
                 return self.config.big_datas;
@@ -281,18 +245,6 @@ odoo.define('pos_retail.big_data', function (require) {
                     status.resolve()
                 });
                 return status;
-            },
-        },
-        {
-            label: 'syncing invoice lines',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'account.invoice.line',
-            loaded: function (self) {
-                var model = 'account.invoice.line';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
             },
         },
         {
@@ -309,18 +261,6 @@ odoo.define('pos_retail.big_data', function (require) {
             },
         },
         {
-            label: 'syncing pos orders',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'pos.order',
-            loaded: function (self) {
-                var model = 'pos.order';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
-            },
-        },
-        {
             label: 'pos order lines',
             condition: function (self) {
                 return self.config.big_datas;
@@ -331,18 +271,6 @@ odoo.define('pos_retail.big_data', function (require) {
                     status.resolve()
                 });
                 return status;
-            },
-        },
-        {
-            label: 'syncing pos order lines',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'pos.order.line',
-            loaded: function (self) {
-                var model = 'pos.order.line';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
             },
         },
         {
@@ -359,18 +287,6 @@ odoo.define('pos_retail.big_data', function (require) {
             },
         },
         {
-            label: 'syncing sale orders',
-            sync: 'sale.order',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            loaded: function (self) {
-                var model = 'sale.order';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
-            },
-        },
-        {
             label: 'sale order lines',
             condition: function (self) {
                 return self.config.big_datas;
@@ -382,19 +298,7 @@ odoo.define('pos_retail.big_data', function (require) {
                 });
                 return status;
             },
-        },
-        {
-            label: 'syncing sale lines',
-            condition: function (self) {
-                return self.config.big_datas;
-            },
-            sync: 'sale.order.line',
-            loaded: function (self) {
-                var model = 'sale.order.line';
-                var status = self.session_start_get_modifiers_backend(model);
-                return status
-            },
-        },
+        }
     ]);
 
     var _super_Order = models.Order.prototype;
@@ -427,7 +331,6 @@ odoo.define('pos_retail.big_data', function (require) {
         },
         initialize: function (session, attributes) {
             this.deleted = {};
-            this.init_sync_datas = {}; // variable save all datas change from backend when load pos, and when screen init done. We resync
             this.total_products = 0;
             this.total_clients = 0;
             this.load_indexed_db_done = false;
@@ -487,39 +390,6 @@ odoo.define('pos_retail.big_data', function (require) {
                 return (min / max).toFixed(1)
             }
         },
-        // TODO: when pos start, we call backend get any modifiers of model pos.order, pos.order.line, product....
-        session_start_get_modifiers_backend: function (model) {
-            var self = this;
-            var status = new $.Deferred();
-            if (this.db.write_date_by_model[model]) {
-                var args = [[], this.db.write_date_by_model[model], model];
-                if (model == 'pos.order' || model == 'pos.order.line' || model == 'account.invoice' || model == 'account.invoice.line') {
-                    args = [[], this.db.write_date_by_model[model], model, this.config.id];
-                }
-                return rpc.query({
-                    model: 'pos.cache.database',
-                    method: 'get_modifiers_backend',
-                    args: args
-                }).then(function (results) {
-                    if (results.length) {
-                        var model = results[0]['model'];
-                        self.init_sync_datas[model] = results;
-                    }
-                    status.resolve();
-                }).fail(function (error) {
-                    if (error.code == -32098) {
-                        console.warn('Your odoo backend offline, or your internet connection have problem');
-                    } else {
-                        console.warn('Your database have issues, could sync with pos');
-                    }
-                    status.reject();
-                });
-                return status
-            } else {
-                status.resolve();
-                return status
-            }
-        },
         // TODO: when pos session online, if pos session have notification from backend, we get datas modifires and sync to pos
         get_modifiers_backend: function (model) {
             var self = this;
@@ -551,6 +421,32 @@ odoo.define('pos_retail.big_data', function (require) {
             } else {
                 status.resolve();
                 return status
+            }
+        },
+        // TODO: get all modifiers of all models from backend and sync to pos
+        get_modifiers_backend_all_models: function (models) {
+            var model_values = {};
+            for (var index in models) {
+                if (this.db.write_date_by_model[models[index]]) {
+                    model_values[models[index]] = this.db.write_date_by_model[models[index]]
+                }
+            }
+            if (model_values) {
+                var args = [[], model_values, this.config.id];
+                return rpc.query({
+                    model: 'pos.cache.database',
+                    method: 'get_modifiers_backend_all_models',
+                    args: args
+                }).then(function () {
+                    return true
+                }).fail(function (error) {
+                    if (error.code == -32098) {
+                        console.warn('Your odoo backend offline, or your internet connection have problem');
+                    } else {
+                        console.warn('Your database have issues, could sync with pos');
+                    }
+
+                });
             }
         },
         save_results: function (model, results) { // this method only call when indexdb_db running
@@ -591,7 +487,6 @@ odoo.define('pos_retail.big_data', function (require) {
             function installing_data(model_name, min_id, max_id) {
                 var domain = [['id', '>=', min_id], ['id', '<', max_id]];
                 var context = {};
-                // context['retail'] = true;
                 if (model['model'] == 'product.product') {
                     domain.push(['available_in_pos', '=', true]);
                     var price_id = null;
@@ -609,6 +504,8 @@ odoo.define('pos_retail.big_data', function (require) {
                 if (min_id == 0) {
                     max_id = self.max_load;
                 }
+                var process = self.get_process_time(min_id, model['max_id']);
+                self.chrome.loading_message(_t('Keep POS online, caching datas of ') + model['model'] + ': ' + (process * 100).toFixed(3) + ' %', process);
                 return rpc.query({
                     model: 'pos.cache.database',
                     method: 'install_data',
@@ -619,8 +516,6 @@ odoo.define('pos_retail.big_data', function (require) {
                         results = JSON.parse(results);
                     }
                     if (results.length > 0) {
-                        var process = self.get_process_time(min_id, model['max_id']);
-                        self.chrome.loading_message(_t('Keep POS online, caching datas of ') + model['model'] + ': ' + (process * 100).toFixed(3) + ' %', process);
                         max_id += self.next_load;
                         installing_data(model_name, min_id, max_id);
                         indexed_db.write(model_name, results);
@@ -655,7 +550,7 @@ odoo.define('pos_retail.big_data', function (require) {
             for (var i = 0; i <= 50; i++) {
                 indexedDB.deleteDatabase(dbName + '_' + i);
             }
-            console.warn('have another user deleted pos database via polling')
+            console.log('remove_indexed_db succeeded !')
         },
         load_server_data: function () {
             var self = this;
@@ -680,13 +575,7 @@ odoo.define('pos_retail.big_data', function (require) {
                                         return $.when(self.api_install_datas('pos.order.line')).then(function () {
                                             return $.when(self.api_install_datas('sale.order')).then(function () {
                                                 return $.when(self.api_install_datas('sale.order.line')).then(function () {
-                                                    var models_sync = _.filter(self.models, function (model) {
-                                                        return model['sync'] != undefined;
-                                                    });
-                                                    for (var index in models_sync) {
-                                                        var model = models_sync[index];
-                                                        self.get_modifiers_backend(model['sync']);
-                                                    }
+                                                    return true;
                                                 })
                                             })
                                         })
@@ -699,10 +588,15 @@ odoo.define('pos_retail.big_data', function (require) {
                     return true;
                 }
             }).then(function () {
-                if (!self.config.big_datas) {
-                    return true;
+                if (self.config.big_datas) {
+                    var list_model = [];
+                    for (var i = 0; i < self.model_lock.length; i++) {
+                        list_model.push(self.model_lock[i]['model'])
+                    }
+                    self.get_modifiers_backend_all_models(list_model).done(function () {
+                        self.set('sync_backend', {state: 'connected', pending: 0});
+                    });
                 }
-                return true;
             })
         }
     });

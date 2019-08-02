@@ -118,8 +118,12 @@
             <t t-if="widget.options.session">
                 <t t-value="widget.options.session" t-set="session" />
                 <div class="popup popup-text session-popup">
-                    <p class="title session-title"><t t-esc=" widget.options.title || '' " /></p>
-                    <p class="body"><t t-esc=" widget.options.body || '' " /></p>
+                    <t t-if="widget.options.title">
+                        <p class="title session-title"><t t-esc=" widget.options.title || '' " /></p>
+                    </t>
+                    <t t-if="widget.options.body">
+                        <p class="body"><t t-esc=" widget.options.body || '' " /></p>
+                    </t>
                     <div class="session_form">
                         <t t-if="session.cash_control == true">
                             <button t-attf-class="btn EndOfSession endsessionbutton highlight #{ session.state !='opened'  ? 'display-hide' : '' }">

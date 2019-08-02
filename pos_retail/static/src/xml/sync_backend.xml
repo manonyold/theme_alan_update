@@ -5,7 +5,7 @@
         <div class="oe_status js_synch status_sync_backend">
             <span class='js_msg oe_hidden'>0</span>
             <div class="js_connected oe_icon">
-                <i style="color: #4CAF50" class='fa fa-fw fa-refresh' role="img" aria-label="Synchronisation Connected" title="No datas sync"></i>
+                <i class='fa fa-fw fa-refresh' role="img" aria-label="Synchronisation Connected" title="No datas sync"></i>
             </div>
             <div class="js_connecting oe_icon notifications_coming blink oe_hidden">
                 <i class='fa fa-fw fa-spin fa-spinner' role="img" aria-label="Synchronisation Connecting" title="Need click for sync"></i>

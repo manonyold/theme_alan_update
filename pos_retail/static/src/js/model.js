@@ -17,6 +17,72 @@ odoo.define('pos_retail.model', function (require) {
 
     var _super_PosModel = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
+        _check_unique_phone: function (phone, partner_id) {
+            if (partner_id) {
+                var old_partners = _.filter(this.db.partners, function (partner_check) {
+                    return partner_check['id'] != partner_id && partner_check['phone'] == fields['phone'];
+                });
+                if (old_partners.length != 0) {
+                    return this.pos.gui.show_popup('dialog', {
+                        title: 'Warning',
+                        body: 'Phone have used before, your phone input of other client ' + old_partners[0]['name']
+                    })
+                }
+            } else {
+                var old_partners = _.filter(this.db.partners, function (partner_check) {
+                    return partner_check['phone'] == fields['phone'];
+                });
+                if (old_partners.length != 0) {
+                    return this.pos.gui.show_popup('dialog', {
+                        title: 'Warning',
+                        body: 'Phone have used before, your phone input of other client ' + old_partners[0]['name']
+                    })
+                }
+            }
+        },
+        _check_unique_email: function (phone, partner_id) {
+            if (partner_id) {
+                    var old_partners = _.filter(this.db.partners, function (partner_check) {
+                        return partner_check['id'] != partner_id && partner_check['email'] == fields['email'];
+                    });
+                    if (old_partners.length != 0) {
+                        return this.pos.gui.show_popup('dialog', {
+                            title: 'Warning',
+                            body: 'Email is duplicated with other customer' + old_partners[0]['name']
+                        })
+                    }
+                } else {
+                    var old_partners = _.filter(this.db.partners, function (partner_check) {
+                        return partner_check['email'] == fields['email'];
+                    });
+                    if (old_partners.length != 0) {
+                        return this.pos.gui.show_popup('dialog', {
+                            title: 'Warning',
+                            body: 'Email is duplicated with other customer' + old_partners[0]['name']
+                        })
+                    }
+                }
+        },
+        _search_read_by_model_and_id: function (model, ids) {
+            var status = new $.Deferred();
+            var object = this.get_model(model);
+            if (model && object.fields) {
+                rpc.query({
+                    model: model,
+                    method: 'search_read',
+                    domain: [['id', 'in', ids]],
+                    fields: object.fields
+                }).then(function (datas) {
+                    status.resolve(datas)
+                }).fail(function (error) {
+                    status.reject(error)
+                })
+            } else {
+                status.resolve([])
+            }
+            return status
+
+        },
         _update_cart_qty_by_order: function (product_ids) {
             var order = this.get_order();
             if (!order) {
@@ -124,8 +190,6 @@ odoo.define('pos_retail.model', function (require) {
                 'multi_uom',
                 'multi_variant',
                 'supplier_barcode',
-                'manufacturing_out_of_stock',
-                'manufacturing_state',
                 'is_combo',
                 'combo_limit',
                 'uom_po_id',

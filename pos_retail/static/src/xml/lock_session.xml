@@ -25,7 +25,7 @@
         <div class="oe_status js_synch">
             <span class='js_msg oe_hidden'>0</span>
             <div class="js_connected oe_icon">
-                <i style="color: #4caf50" class='fa fa-fw fa-unlock oe_green' role="img" aria-label="Lock screen" title="Lock screen"></i>
+                <i class='fa fa-fw fa-unlock oe_green' role="img" aria-label="Lock screen" title="Lock screen"></i>
             </div>
             <div class="js_connecting oe_icon oe_hidden">
                 <i style="color: #f44336" class='fa fa-fw fa-lock oe_green' role="img" aria-label="UnLock screen" title="Unlock screen"></i>

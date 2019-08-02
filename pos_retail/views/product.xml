@@ -96,12 +96,6 @@
                             <label for="multi_variant" string="Multi variant"/>
                         </div>
                     </div>
-                    <div name="manufacturing_out_of_stock" groups="point_of_sale.group_pos_manager">
-                        <div>
-                            <field name="manufacturing_out_of_stock"/>
-                            <label for="manufacturing_out_of_stock" string="Auto manufacturing"/>
-                        </div>
-                    </div>
                     <div name="cross_selling" groups="point_of_sale.group_pos_manager">
                         <div>
                             <field name="cross_selling"/>
@@ -206,19 +200,6 @@
                                         <field name="price_unit"/>
                                     </tree>
                                 </field>
-                            </group>
-                        </div>
-                        <div name="mrp" attrs="{'invisible': [('manufacturing_out_of_stock', '=', False)]}"
-                             groups="point_of_sale.group_pos_manager">
-                            <group>
-                                <field name="manufacturing_state"
-                                       attrs="{'invisible': ['|', ('manufacturing_out_of_stock', '=', False), ('available_in_pos', '=', False)], 'required': [('manufacturing_out_of_stock', '=', True), ('available_in_pos', '=', True)]}"/>
-                                <field name="pos_min_qty"
-                                       attrs="{'invisible': ['|', ('manufacturing_out_of_stock', '=', False), ('available_in_pos', '=', False)], 'required': [('manufacturing_out_of_stock', '=', True), ('available_in_pos', '=', True)]}"/>
-                                <field name="pos_manufacturing_quantity"
-                                       attrs="{'invisible': ['|', ('manufacturing_out_of_stock', '=', False), ('available_in_pos', '=', False)], 'required': [('manufacturing_out_of_stock', '=', True), ('available_in_pos', '=', True)]}"/>
-                                <field name="bom_id" context="{'default_product_tmpl_id': active_id}"
-                                       attrs="{'invisible': ['|', ('manufacturing_out_of_stock', '=', False), ('available_in_pos', '=', False)]}"/>
                             </group>
                         </div>
                         <div name="pos_multi_category" attrs="{'invisible': [('multi_category', '=', False)]}"

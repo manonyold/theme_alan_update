@@ -88,8 +88,8 @@
         <t t-jquery="t[t-esc*='line.name']" t-operation="after">
             <t t-if="line.voucher_code">
                 <li class="voucher_code">
+                    <i class="fa fa-gift"/>
                     <t t-esc='line.voucher_code' />
-                    <img class="order_logo" src="/pos_retail/static/src/icons/gift_card.png"/>
                 </li>
             </t>
         </t>
@@ -104,9 +104,9 @@
         <t t-jquery="section[class*='payment-numpad']" t-operation="after">
             <section>
                 <span class='left_button button_text button back back_products_screen'>
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
-                            esc
+                            esc/b
                         </span>
                     </t>
                     <div class="button-icon">
@@ -119,7 +119,7 @@
                 <t t-if="widget.pos.config.paid_full">
                     <t t-if="widget.pos.get_order() and widget.pos.get_order().get_total_with_tax() &gt; 0">
                         <span class='left_button button_text button paid_full'>
-                            <t t-if="widget.pos.config.keyboard_event">
+                            <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                                 <span class="button_key">
                                     f
                                 </span>
@@ -136,7 +136,7 @@
                 <t t-if="widget.pos.config.paid_partial">
                     <t t-if="widget.pos.get_order() and widget.pos.get_order().get_total_with_tax() &gt; 0">
                         <span class='left_button button_text button paid_partial'>
-                            <t t-if="widget.pos.config.keyboard_event">
+                            <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                                 <span class="button_key">
                                     p
                                 </span>
@@ -151,7 +151,7 @@
                     </t>
                 </t>
                 <span class='left_button button_text button next'>
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             Space
                         </span>
@@ -181,7 +181,7 @@
                     </t>
                 </section>
             </t>
-            <t t-if="widget.pos.get_order() and widget.pos.get_order().get_note()">
+            <t t-if="widget.pos.get_order() and widget.pos.get_order().get_note() and !widget.pos.config.replace_payment_screen">
                 <section class='set-note'>
                     <div class="order-note-information">
                         <div class="title">Order Notes</div>
@@ -292,7 +292,7 @@
                 </t>
                 <t t-if="widget.pos.bus_locations.length > 0">
                     <span class="left_button add_team">
-                        <t t-if="widget.pos.config.keyboard_event">
+                        <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                             <span class="button_key">
                                 l
                             </span>
@@ -311,7 +311,7 @@
                     </span>
                 </t>
                 <span class="left_button js_signature_order">
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             s
                         </span>
@@ -324,7 +324,7 @@
                     </div>
                 </span>
                 <span class="left_button add_note">
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             n
                         </span>
@@ -360,7 +360,7 @@
         </t>
         <t t-jquery="div[class*='js_set_customer']" t-operation="replace">
             <span class="left_button js_set_customer">
-                <t t-if="widget.pos.config.keyboard_event">
+                <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                     <span class="button_key">
                         c
                     </span>
@@ -379,7 +379,7 @@
             </span>
             <t t-if="widget.pos.get_order()">
                 <span class="left_button input_voucher">
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             v
                         </span>
@@ -393,7 +393,7 @@
                 </span>
                 <t t-if="widget.pos.get_order().get_total_with_tax() &lt; 0">
                     <span t-attf-class='left_button js_create_voucher #{ widget.pos.get_order().get_order_is_create_voucher() ? "highlight" : ""} '>
-                        <t t-if="widget.pos.config.keyboard_event">
+                        <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                             <span class="button_key">
                                 v
                             </span>
@@ -409,7 +409,7 @@
             </t>
             <t t-if="widget.pos.get_order() and widget.pos.get_order().get_total_with_tax()  &lt; 0">
                 <span t-attf-class='left_button add_credit #{ widget.pos.get_order().is_add_credit() ? "highlight" : ""} '>
-                     <t t-if="widget.pos.config.keyboard_event">
+                     <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             d
                         </span>
@@ -424,7 +424,7 @@
             </t>
             <t t-if="widget.pos.config.wallet">
                 <span class="left_button add_wallet">
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             w
                         </span>
@@ -442,7 +442,7 @@
         <!--<t t-jquery="t[t-if*='widget.pos.config.iface_invoicing']" t-operation="replace"> this is only for v11 and 10 -->
             <t t-if='widget.pos.get_order()'>
                 <span t-attf-class='left_button js_invoice #{ widget.pos.get_order().is_to_invoice() ? "highlight" : ""} '>
-                    <t t-if="widget.pos.config.keyboard_event">
+                    <t t-if="widget.pos.config.keyboard_event and !widget.pos.config.replace_payment_screen">
                         <span class="button_key">
                             i
                         </span>

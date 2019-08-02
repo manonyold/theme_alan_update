@@ -23,7 +23,8 @@ odoo.define('pos_retail.cash_management', function (require) {
                 calling.resolve();
                 if (sessions) {
                     self.pos.gui.show_popup('popup_session', {
-                        session: sessions[0]
+                        session: sessions[0],
+                        title: 'Cash Control',
                     })
                 } else {
                     self.pos.gui.show_popup('dialog', {

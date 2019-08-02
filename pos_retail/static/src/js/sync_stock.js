@@ -1,32 +1,6 @@
 odoo.define('pos_retail.sync_stock', function (require) {
     var models = require('point_of_sale.models');
-    var exports = {};
-    var Backbone = window.Backbone;
-    var bus = require('pos_retail.core_bus');
     var rpc = require('pos.rpc');
-
-    exports.sync_stock = Backbone.Model.extend({ // chanel 2: pos sync backend
-        initialize: function (pos) {
-            this.pos = pos;
-        },
-        start: function () {
-            this.bus = bus.bus;
-            this.bus.last = this.pos.db.load('bus_last', 0);
-            this.bus.on("notification", this, this.on_notification);
-            this.bus.start_polling();
-        },
-        on_notification: function (notifications) {
-            if (notifications && notifications[0] && notifications[0][1]) {
-                for (var i = 0; i < notifications.length; i++) {
-                    var channel = notifications[i][0][1];
-                    if (channel == 'pos.sync.stock') {
-                        var product_ids = JSON.parse(notifications[i][1]);
-                        this.pos._do_update_quantity_onhand(product_ids);
-                    }
-                }
-            }
-        }
-    });
 
     var _super_posmodel = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
@@ -51,7 +25,7 @@ odoo.define('pos_retail.sync_stock', function (require) {
                         products.push(product);
                         var qty_available = datas[product_id];
                         self.db.stock_datas[product['id']] = qty_available;
-                        console.log(product['display_name'] + ' qty_available : ' + qty_available)
+                        console.log('-> ' + product['display_name'] + ' qty_available : ' + qty_available)
                     }
                 }
                 if (products.length) {
@@ -64,16 +38,34 @@ odoo.define('pos_retail.sync_stock', function (require) {
             });
             return def;
         },
-        load_server_data: function () {
+        _save_to_server: function (orders, options) {
             var self = this;
-            return _super_posmodel.load_server_data.apply(this, arguments).then(function () {
-                if (self.config.display_onhand) {
-                    self.sync_stock = new exports.sync_stock(self);
-                    self.sync_stock.start();
+            var res = _super_posmodel._save_to_server.call(this, orders, options);
+            if (!this.product_need_update_stock_ids) {
+                this.product_need_update_stock_ids = [];
+            }
+            if (orders.length) {
+                for (var n = 0; n < orders.length; n++) {
+                    var order = orders[n]['data'];
+                    for (var i = 0; i < order.lines.length; i++) {
+                        var line = order.lines[i][2];
+                        var product_id = line['product_id'];
+                        var product = this.db.get_product_by_id(product_id);
+                        if (product.type == 'product') {
+                            this.product_need_update_stock_ids.push(product_id);
+                        }
+                    }
                 }
-            })
+            }
+            res.done(function (order_ids) {
+                if (self.product_need_update_stock_ids.length) {
+                    self._do_update_quantity_onhand(self.product_need_update_stock_ids).done(function () {
+                        self.product_need_update_stock_ids= [];
+                    });
+                }
+            });
+            return res;
         },
     });
 
-    return exports;
 });

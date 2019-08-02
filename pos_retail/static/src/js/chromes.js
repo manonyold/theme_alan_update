@@ -24,12 +24,8 @@ odoo.define('pos_retail.chromes', function (require) {
                         $('.rightpane').animate({left: 540}, 'fast');
                         $('.fa fa-list').toggleClass('highlight');
                         $('.show_hide_buttons .fa-list').toggleClass('fa-list fa-th');
-                        $('.quickly_buttons').animate({width: 0}, 'slow');
-                        $('.quickly_buttons').toggleClass('oe_hidden');
                         self.pos.show_left_buttons = false;
                     } else {
-                        $('.quickly_buttons').animate({width: '100%'}, 'slow');
-                        $('.quickly_buttons').removeClass('oe_hidden');
                         $('.buttons_pane').animate({width: 220}, 'fast');
                         $('.leftpane').animate({left: 0}, 'fast');
                         $('.rightpane').animate({left: 760}, 'fast');
@@ -64,8 +60,8 @@ odoo.define('pos_retail.chromes', function (require) {
             var orders = this.pos.get('orders');
             if (orders.length == 1) {
                 return this.pos.gui.show_popup('dialog', {
-                    'title': _t('Error'),
-                    'body': _t('Could not delete order, pos required minimum have 1 order still on pos'),
+                    'title': _t('Warning'),
+                    'body': _t('Your session only one order, could not remove'),
                 });
             }
             if (this.pos.config.validate_remove_order) {
