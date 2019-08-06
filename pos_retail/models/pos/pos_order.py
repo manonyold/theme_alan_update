@@ -766,7 +766,7 @@ class pos_order_line(models.Model):
             del vals['voucher']
         order = self.env['pos.order'].browse(vals['order_id'])
         po_line = super(pos_order_line, self).create(vals)
-        if po_line.product_id.is_voucher and voucher_val:
+        if voucher_val:
             today = datetime.today()
             if voucher_val.get('period_days', None):
                 end_date = today + timedelta(days=voucher_val['period_days'])
@@ -777,7 +777,7 @@ class pos_order_line(models.Model):
                 'customer_id': order.partner_id and order.partner_id.id if order.partner_id else None,
                 'start_date': fields.Datetime.now(),
                 'end_date': end_date,
-                'state': 'draft',
+                'state': 'active',
                 'value': po_line.price_subtotal_incl,
                 'apply_type': voucher_val.get('apply_type', None) if voucher_val.get('apply_type',
                                                                                      None) else 'fixed_amount',

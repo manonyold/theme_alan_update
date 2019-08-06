@@ -54,8 +54,17 @@ odoo.define('pos_retail.pos_chanel', function (require) {
                     'account.invoice',
                     'account.invoice.line',
                 ];
+                self.pos.gui.show_popup('confirm', {
+                    title: 'Processing',
+                    body: 'Syncing with backend, please waiting few seconds',
+                    color: 'warning'
+                });
                 self.pos.get_modifiers_backend_all_models(list_model).done(function () {
                     self.pos.set('sync_backend', {state: 'connected', pending: 0});
+                    self.pos.gui.show_popup('confirm', {
+                        title: 'Great Job !',
+                        body: 'Synced with backend succeeded.',
+                    });
                 });
             });
         },
@@ -98,12 +107,13 @@ odoo.define('pos_retail.pos_chanel', function (require) {
             // -----------------------------------------------------------
             // -----------------------------------------------------------
             // -----------------------------------------------------------
+            console.log('-> sync model: ' + model + ' total: ' + datas.length);
             var self = this;
-            $('.loader').animate({opacity: 1,}, 200, 'swing', function () {
-                $('.loader').removeClass('oe_hidden');
-                $('.loader-feedback').removeClass('oe_hidden');
-                self.chrome.loading_message(('Waiting few seconds, pos auto sync ' + datas.length + ' of model: ' + model), 0.9);
-            });
+            // $('.loader').animate({opacity: 1,}, 200, 'swing', function () {
+            //     $('.loader').removeClass('oe_hidden');
+            //     $('.loader-feedback').removeClass('oe_hidden');
+            //     self.chrome.loading_message(('Waiting few seconds, pos auto sync ' + datas.length + ' of model: ' + model), 0.9);
+            // });
             if (datas.length == 0) {
                 console.warn('Data sync is old times. Reject:' + model);
                 return false;
@@ -163,12 +173,12 @@ odoo.define('pos_retail.pos_chanel', function (require) {
                     }
                 }
             }
-            this.chrome.loading_message('Sync done !');
-            $('.loader').animate({opacity: 0,}, 200, 'swing', function () {
-                $('.loader').addClass('oe_hidden');
-                $('.loader-feedback').addClass('oe_hidden');
-
-            });
+            // this.chrome.loading_message('Sync done !');
+            // $('.loader').animate({opacity: 0,}, 200, 'swing', function () {
+            //     $('.loader').addClass('oe_hidden');
+            //     $('.loader-feedback').addClass('oe_hidden');
+            //
+            // });
         },
         remove_partner_deleted_outof_orders: function (partner_id) {
             var orders = this.get('orders').models;
@@ -188,7 +198,7 @@ odoo.define('pos_retail.pos_chanel', function (require) {
             var res = _super_PosModel._save_to_server.call(this, orders, options);
             res.done(function (order_ids) {
                 if (order_ids.length && self.config.big_datas) {
-                    self.gui.chrome.widget['sync_backend_status'].el.click();
+                    return self.get_modifiers_backend_all_models();
                 }
             });
             return res;

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
 from datetime import datetime
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF
+from odoo.exceptions import UserError
+
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -29,6 +32,9 @@ class res_partner(models.Model):
 
     @api.model
     def create_from_ui(self, partner):
+        if partner.get('birthday_date', None):
+            birthday_date = datetime.strptime(partner.get('birthday_date'), "%d-%m-%Y")
+            partner.update({'birthday_date': birthday_date})
         if partner.get('property_product_pricelist', False):
             partner['property_product_pricelist'] = int(partner['property_product_pricelist'])
         if not partner['property_product_pricelist']:
@@ -86,6 +92,8 @@ class res_partner(models.Model):
     @api.model
     def create(self, vals):
         partner = super(res_partner, self).create(vals)
+        if partner.birthday_date and (partner.birthday_date >= fields.Date.context_today(self)):
+            raise UserError('Birth date could not bigger than today')
         self.env['pos.cache.database'].insert_data(self._inherit, partner.id)
         return partner
 
@@ -97,6 +105,8 @@ class res_partner(models.Model):
                 self.env['pos.cache.database'].insert_data(self._inherit, partner.id)
             if partner.active == False:
                 self.env['pos.cache.database'].remove_record(self._inherit, partner.id)
+            if partner.birthday_date and (partner.birthday_date >= fields.Date.context_today(self)):
+                raise UserError('Birth date could not bigger than today')
         return res
 
     @api.multi

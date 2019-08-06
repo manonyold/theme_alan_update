@@ -94,13 +94,14 @@
               	<div>
 	                <div class="box">
 	                     <span class='label checkbox-label'>Reason <span class="input-required"> (*)</span></span>
-	                     <input class='reason' type="text" placeholder="Reason" required="Mandatory" />
+	                     <input class='reason' name="reason" type="text" placeholder="Reason" required="Mandatory" />
 	                </div>
 	                <div class="box">
 	                    <span class='label checkbox-label'>Amount <span class="input-required"> (*)</span></span>
-	                    <input class="amount" type="number" value="0.00" placeholder="Amount" required="Mandatory" />
+	                    <input class="amount" name="amount" type="number" value="0.00" placeholder="Amount" required="Mandatory" />
 	                </div>
                 </div>
+                <span class="card-issue"/>
                	<div class="footer">
                    	<div class="button confirm">
                        	Confirm

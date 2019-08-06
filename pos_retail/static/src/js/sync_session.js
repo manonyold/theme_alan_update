@@ -67,7 +67,7 @@ odoo.define('pos_retail.synchronization', function (require) {
             var sending = function () {
                 return session.rpc("/pos/sync", params);
             };
-            return sending().fail(function (error, e) {
+            return sending().fail(function (error) {
                 console.error(error.message);
                 if (error.message == "XmlHttpRequestError ") {
                     self.pos.db.add_datas_false(message);
@@ -576,8 +576,8 @@ odoo.define('pos_retail.synchronization', function (require) {
                     } else {
                         console.errorg('Loading new partner fail networking')
                     }
-                }).fail(function (type, error) {
-                    return self.pos.query_backend_fail(type, error);
+                }).fail(function (error) {
+                    return self.pos.query_backend_fail(error);
                 });
             } else {
                 order.syncing = true;

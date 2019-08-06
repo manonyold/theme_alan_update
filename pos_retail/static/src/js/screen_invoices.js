@@ -27,8 +27,7 @@ odoo.define('pos_retail.screen_invoices', function (require) {
         },
         refresh_screen: function () {
             var self = this;
-            this.pos.get_modifiers_backend('account.invoice').then(function () {
-                self.pos.get_modifiers_backend('account.invoice.line');
+            this.pos.get_modifiers_backend_all_models().then(function () {
                 self.pos.trigger('refresh:invoice_screen');
             });
         },
@@ -264,8 +263,8 @@ odoo.define('pos_retail.screen_invoices', function (require) {
                                 });
                             }
 
-                        }).fail(function (type, error) {
-                            return self.pos.query_backend_fail(type, error);
+                        }).fail(function (error) {
+                            return self.pos.query_backend_fail(error);
                         });
                     }
                 })
@@ -285,11 +284,8 @@ odoo.define('pos_retail.screen_invoices', function (require) {
                             window.open(self.link, '_blank');
                         }
                     });
-                }).fail(function (type, error) {
-                    self.gui.show_popup('dialog', {
-                        title: 'ERROR',
-                        body: 'Please check log of your odoo, could not process your action',
-                    });
+                }).fail(function (error) {
+                    self.pos.query_backend_fail(error)
                 });
 
             });
@@ -348,8 +344,8 @@ odoo.define('pos_retail.screen_invoices', function (require) {
                                                             window.open(self.link, '_blank');
                                                         }
                                                     })
-                                                }).fail(function (type, error) {
-                                                    return self.pos.query_backend_fail(type, error);
+                                                }).fail(function (error) {
+                                                    return self.pos.query_backend_fail(error);
                                                 });
                                             });
 
@@ -361,11 +357,11 @@ odoo.define('pos_retail.screen_invoices', function (require) {
                                         })
                                     }
                                 })
-                            }).fail(function (type, error) {
-                                return self.pos.query_backend_fail(type, error);
+                            }).fail(function (error) {
+                                return self.pos.query_backend_fail(error);
                             });
-                        }).fail(function (type, error) {
-                            return self.pos.query_backend_fail(type, error);
+                        }).fail(function (error) {
+                            return self.pos.query_backend_fail(error);
                         });
                     }
                 })

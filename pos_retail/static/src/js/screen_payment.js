@@ -283,7 +283,7 @@ odoo.define('pos_retail.screen_payment', function (require) {
                                 return rate_id;
                             }).then(function () {
                                 self.gui.close_popup();
-                            }).fail(function (type, error) {
+                            }).fail(function (error) {
                                 if (error.code === 200) {
                                     event.preventDefault();
                                     self.gui.show_popup('dialog', {

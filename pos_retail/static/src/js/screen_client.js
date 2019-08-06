@@ -1,9 +1,186 @@
 "use strict";
 odoo.define('pos_retail.screen_client_list', function (require) {
-
+    var models = require('point_of_sale.models');
     var screens = require('point_of_sale.screens');
     var core = require('web.core');
     var qweb = core.qweb;
+    var rpc = require('pos.rpc');
+    var PopupWidget = require('point_of_sale.popups');
+    var gui = require('point_of_sale.gui');
+
+    var popup_create_customer = PopupWidget.extend({
+        template: 'popup_create_customer',
+        show: function (options) {
+            var self = this;
+            this.uploaded_picture = null;
+            this._super(options);
+            this.$('.datepicker').datetimepicker({
+                format: 'DD-MM-YYYY',
+                icons: {
+                    time: "fa fa-clock-o",
+                    date: "fa fa-calendar",
+                    up: "fa fa-chevron-up",
+                    down: "fa fa-chevron-down",
+                    previous: 'fa fa-chevron-left',
+                    next: 'fa fa-chevron-right',
+                    today: 'fa fa-screenshot',
+                    clear: 'fa fa-trash',
+                    close: 'fa fa-remove'
+                }
+            });
+            var contents = this.$('.create_partner');
+            contents.scrollTop(0);
+            this.$('.confirm').click(function () {
+                var fields = {};
+                $('.partner_input').each(function (idx, el) {
+                    fields[el.name] = el.value || false;
+                });
+                if (!fields.name) {
+                    return self.wrong_input('input[name="name"]', '(*) Field Name is required');
+                } else {
+                    self.passed_input('input[name="name"]');
+                }
+                if (fields['phone']) {
+                    var is_phone = self.check_is_number(fields['phone']);
+                    if (!is_phone) {
+                        return self.wrong_input('input[name="phone"]', '(*) Field Phone is not number [0-9]');
+                    }
+                } else {
+                    self.passed_input('input[name="phone"]');
+                }
+                if (fields['mobile']) {
+                    var is_mobile = self.check_is_number(fields['mobile']);
+                    if (!is_mobile) {
+                        return self.wrong_input('input[name="mobile"]', '(*) Field Mobile is not number [0-9]');
+                    }
+                } else {
+                    self.passed_input('input[name="mobile"]');
+                }
+                if (self.pos.config.check_duplicate_email && fields['email']) {
+                    var is_duplicate = self._check_is_duplicate(fields['email'], 'email');
+                    if (is_duplicate) {
+                        return self.wrong_input('input[name="email"]', '(*) Field email used by another client');
+                    }
+                } else {
+                    self.passed_input('input[name="email"]');
+                }
+                if (self.pos.config.check_duplicate_phone && fields['phone']) {
+                    var is_duplicate = self._check_is_duplicate(fields['phone'], 'phone');
+                    if (is_duplicate) {
+                        return self.wrong_input('input[name="phone"]', '(*) Field phone used by another client');
+                    }
+                } else {
+                    self.passed_input('input[name="phone"]');
+                }
+                if (self.pos.config.check_duplicate_phone && fields['mobile']) {
+                    var is_duplicate = self._check_is_duplicate(fields['mobile'], 'mobile');
+                    if (is_duplicate) {
+                        return self.wrong_input('input[name="mobile"]', '(*) Field mobile used by another client');
+                    }
+                } else {
+                    self.passed_input('input[name="mobile"]');
+                }
+                if (self.uploaded_picture) {
+                    fields.image = self.uploaded_picture.split(',')[1];
+                }
+                fields['customer'] = true;
+                if (fields['property_product_pricelist']) {
+                    fields['property_product_pricelist'] = parseInt(fields['property_product_pricelist'])
+                }
+                self.pos.gui.close_popup();
+                return rpc.query({
+                    model: 'res.partner',
+                    method: 'create_from_ui',
+                    args: [fields]
+                }).then(function (partner_id) {
+                    var pushing = self.pos._search_read_by_model_and_id('res.partner', [partner_id])
+                    pushing.done(function (datas) {
+                        if (datas.length == 0) {
+                            return;
+                        }
+                        self.pos.sync_with_backend('res.partner', datas, true);
+                        var partner_id = datas[0]['id'];
+                        var client = self.pos.db.get_partner_by_id(partner_id);
+                        var order = self.pos.get_order();
+                        if (client && order) {
+                            order.set_client(client);
+                            self.pos.gui.show_popup('dialog', {
+                                title: 'Great job',
+                                body: 'Set ' + client['name'] + ' to current order',
+                                color: 'success'
+                            })
+                        }
+                    })
+                }, function (err) {
+                    self.pos.query_backend_fail(err);
+                });
+            });
+            this.$('.cancel').click(function () {
+                self.click_cancel();
+            });
+            contents.find('.image-uploader').on('change', function (event) {
+                self.load_image_file(event.target.files[0], function (res) {
+                    if (res) {
+                        contents.find('.client-picture img, .client-picture .fa').remove();
+                        contents.find('.client-picture').append("<img src='" + res + "'>");
+                        contents.find('.detail.picture').remove();
+                        self.uploaded_picture = res;
+                    }
+                });
+            });
+        },
+        load_image_file: function (file, callback) {
+            var self = this;
+            if (!file) {
+                return;
+            }
+            if (file.type && !file.type.match(/image.*/)) {
+                return this.pos.gui.show_popup('dialog', {
+                    title: 'Error',
+                    body: 'Unsupported File Format, Only web-compatible Image formats such as .png or .jpeg are supported',
+                });
+            }
+
+            var reader = new FileReader();
+            reader.onload = function (event) {
+                var dataurl = event.target.result;
+                var img = new Image();
+                img.src = dataurl;
+                self.resize_image_to_dataurl(img, 600, 400, callback);
+            };
+            reader.onerror = function () {
+                return self.pos.gui.show_popup('dialog', {
+                    title: 'Error',
+                    body: 'Could Not Read Image, The provided file could not be read due to an unknown error',
+                });
+            };
+            reader.readAsDataURL(file);
+        },
+        resize_image_to_dataurl: function (img, maxwidth, maxheight, callback) {
+            img.onload = function () {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                var ratio = 1;
+
+                if (img.width > maxwidth) {
+                    ratio = maxwidth / img.width;
+                }
+                if (img.height * ratio > maxheight) {
+                    ratio = maxheight / img.height;
+                }
+                var width = Math.floor(img.width * ratio);
+                var height = Math.floor(img.height * ratio);
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+
+                var dataurl = canvas.toDataURL();
+                callback(dataurl);
+            };
+        }
+    });
+    gui.define_popup({name: 'popup_create_customer', widget: popup_create_customer});
 
     screens.ClientListScreenWidget.include({
         init: function (parent, options) {
@@ -15,7 +192,7 @@ odoo.define('pos_retail.screen_client_list', function (require) {
         },
         refresh_screen: function () {
             var self = this;
-            this.pos.get_modifiers_backend('res.partner').then(function () {
+            this.pos.get_modifiers_backend_all_models().then(function () {
                 self.pos.trigger('refresh:partner_screen');
             });
         },
@@ -51,7 +228,7 @@ odoo.define('pos_retail.screen_client_list', function (require) {
         display_client_details: function (visibility, partner, clickpos) { // TODO: we add input type date to box birth day of client edit
             this._super(visibility, partner, clickpos);
             this.$('.datepicker').datetimepicker({
-                format: 'YYYY-MM-DD',
+                format: 'DD-MM-YYYY',
                 icons: {
                     time: "fa fa-clock-o",
                     date: "fa fa-calendar",
@@ -239,29 +416,120 @@ odoo.define('pos_retail.screen_client_list', function (require) {
             this.$('.client-details-contents .detail').each(function (idx, el) {
                 fields[el.name] = el.value || false;
             });
+            if (!fields['name']) {
+                return this.wrong_input('input[name="name"]', '(*) Field name is required');
+            } else {
+                this.passed_input('input[name="name"]');
+            }
+            if (fields['phone']) {
+                var is_phone = this.check_is_number(fields['phone']);
+                if (!is_phone) {
+                    return this.wrong_input('input[name="phone"]', '(*) Field phone is not a number');
+                }
+            } else {
+                this.passed_input('input[name="phone"]');
+            }
+            if (fields['mobile']) {
+                var is_mobile = this.check_is_number(fields['mobile']);
+                if (!is_mobile) {
+                    return this.wrong_input('input[name="mobile"]', '(*) Field mobile is not a number');
+                }
+            } else {
+                this.passed_input('input[name="mobile"]');
+            }
             if (this.pos.config.check_duplicate_email && fields['email']) {
-                if (id) {
-                    this.pos._check_unique_email(fields['email'], id)
+                var is_duplicated = this._check_is_duplicate(fields['email'], 'email', id);
+                if (is_duplicated) {
+                    return this.wrong_input('input[name="email"]', '(*) Field email is unique, this email used another client');
                 } else {
-                    this.pos._check_unique_email(fields['email'])
+                    this.passed_input('input[name="email"]');
                 }
             }
             if (this.pos.config.check_duplicate_phone && fields['phone']) {
-                if (id) {
-                    this.pos._check_unique_phone(fields['phone'], id)
+                var is_duplicated = this._check_is_duplicate(fields['phone'], 'phone', id);
+                if (is_duplicated) {
+                    return this.wrong_input('input[name="phone"]', '(*) Field phone is unique, this phone used another client');
                 } else {
-                    this.pos._check_unique_phone(fields['phone'])
+                    this.passed_input('input[name="phone"]');
                 }
             }
             if (this.pos.config.check_duplicate_phone && fields['mobile']) {
-                if (id) {
-                    this.pos._check_unique_phone(fields['mobile'], id)
+                var is_duplicated = this._check_is_duplicate(fields['mobile'], 'mobile', id);
+                if (is_duplicated) {
+                    return this.wrong_input('input[name="mobile"]', '(*) Field mobile is unique, this mobile used another client');
                 } else {
-                    this.pos._check_unique_phone(fields['mobile'])
+                    this.passed_input('input[name="mobile"]');
                 }
             }
             return this._super(partner);
         },
+        saved_client_details: function (partner_id) {
+            var self = this;
+            this.reload_partners(partner_id).then(function () {
+                var partner = self.pos.db.get_partner_by_id(partner_id);
+                if (partner) {
+                    self.new_client = partner;
+                    self.toggle_save_button();
+                    self.display_client_details('show', partner);
+                } else {
+                    // should never happen, because create_from_ui must return the id of the partner it
+                    // has created, and reload_partner() must have loaded the newly created partner.
+                    self.display_client_details('hide');
+                }
+            }).always(function () {
+                $(".client-details-contents").on('click', '.button.save', function () {
+                    if (self.new_client) {
+                        self.save_client_details(self.new_client);
+                    }
+                });
+            });
+        },
+        reload_partners: function (partner_id) {
+            var self = this;
+            return this.pos.load_new_partners(partner_id).then(function () {
+                self.partner_cache = new screens.DomCache();
+                self.render_list(self.pos.db.get_partners_sorted(1000));
+                var curr_client = self.pos.get_order().get_client();
+                if (curr_client) {
+                    self.pos.get_order().set_client(self.pos.db.get_partner_by_id(curr_client.id));
+                }
+            });
+        },
     });
 
+    models.PosModel = models.PosModel.extend({
+        load_new_partners: function (partner_id) {
+            // TODO 1: we force method odoo because we only need load new partner with partner_id, not check write_date
+            // TODO 2: so if you need reuse, you call can this method without partner_id
+            var self = this;
+            var def = new $.Deferred();
+            var fields = _.find(this.models, function (model) {
+                return model.model === 'res.partner';
+            }).fields;
+            if (partner_id) {
+                var domain = [['id', '=', partner_id]];
+            } else {
+                var domain = [['customer', '=', true], ['write_date', '>', this.db.get_partner_write_date()]];
+            }
+            rpc.query({
+                model: 'res.partner',
+                method: 'search_read',
+                args: [domain, fields],
+            }, {
+                timeout: 3000,
+                shadow: true,
+            })
+                .then(function (partners) {
+                    if (self.db.add_partners(partners)) {   // check if the partners we got were real updates
+                        def.resolve();
+                    } else {
+                        def.reject();
+                    }
+                }, function (err) {
+                    def.reject(err);
+                });
+            return def;
+        },
+
+    })
 });

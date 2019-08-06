@@ -90,10 +90,7 @@ odoo.define('pos_retail.mobile', function (require) {
                         }).then(function (result) {
                             self.pos.reload_pos();
                         }, function (type, err) {
-                            self.pos.gui.show_popup('dialog', {
-                                title: 'Error',
-                                body: 'Odoo connection fail, could not save'
-                            })
+                            self.pos.query_backend_fail(err);
                         });
                     }
                 });
@@ -133,11 +130,8 @@ odoo.define('pos_retail.mobile', function (require) {
                             ]
                         }).then(function () {
                             self.pos.reload_pos();
-                        }, function (type, err) {
-                            self.pos.gui.show_popup('dialog', {
-                                title: 'Error',
-                                body: 'Odoo connection fail, could not save'
-                            })
+                        }, function (err) {
+                            self.pos.query_backend_fail(err);
                         });
                     }
                 });

@@ -38,42 +38,22 @@ class pos_cache_database(models.Model):
             if record.deleted:
                 value['deleted'] = True
                 results.append(value)
-                continue
             else:
                 val = self.get_data(record.res_model, int(record.res_id), config_id)
                 if val:
                     value.update(val)
                     results.append(value)
-                    continue
         return results
 
-    # TODO: when cashiers submit order, pos auto call this function for get any modifiers from backend
     @api.multi
     def get_modifiers_backend_all_models(self, model_values, config_id=None):
-        threaded_synchronization = threading.Thread(target=self._modifiers_backend_all_models, args=(model_values, config_id))
-        threaded_synchronization.start()
-        return {}
-
-    @api.multi
-    def _modifiers_backend_all_models(self, model_values=[], config_id=False):
-        with api.Environment.manage():
-            new_cr = registry(self._cr.dbname).cursor()
-            self = self.with_env(self.env(cr=new_cr))
-            results = {}
-            for model, write_date in model_values.items():
-                values = self.get_modifiers_backend(write_date, model, config_id)
-                results[model] = values
-            sessions = self.env['pos.session'].sudo().search([
-                ('state', '=', 'opened'),
-                ('config_id', '=', config_id),
-
-            ])
-            for session in sessions:
-                self.env['bus.bus'].sendmany(
-                    [[(self.env.cr.dbname, 'pos.sync.backend', session.user_id.id), results]])
-            new_cr.commit()
-            new_cr.close()
-        return True
+        _logger.info('--> BEGIN get_modifiers_backend_all_models')
+        results = {}
+        for model, write_date in model_values.items():
+            values = self.get_modifiers_backend(write_date, model, config_id)
+            results[model] = values
+        _logger.info('--> END get_modifiers_backend_all_models')
+        return results
 
     @api.model
     def get_onhand_by_product_id(self, product_id):
@@ -177,7 +157,8 @@ class pos_cache_database(models.Model):
         return True
 
     @api.multi
-    def get_data(self, model, record_id, config_id):
+    def get_data(self, model, record_id, config_id=None):
+        _logger.info('--> begin get_data() id %s of model %s of config %s' % (record_id, model, config_id))
         data = {
             'model': model
         }

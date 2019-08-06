@@ -65,9 +65,34 @@ class pos_voucher(models.Model):
             'apply_type': 'fixed_amount',
             'method': 'general',
             'source': order.name,
-            'pos_order_id': order.id
+            'pos_order_id': order.id,
+            'user_id': self.env.user.id
         })
         return True
+
+    @api.multi
+    def order_return_become_voucher(self, voucher_val):
+        today = datetime.today()
+        end_date = today + timedelta(days=voucher_val['period_days'])
+        val = {
+            'number': voucher_val.get('number', None) if voucher_val.get('number', None) else '',
+            'customer_id': voucher_val.get('customer_id', None),
+            'start_date': fields.Datetime.now(),
+            'end_date': end_date,
+            'state': 'active',
+            'value': voucher_val.get('value'),
+            'apply_type': voucher_val.get('apply_type', None) if voucher_val.get('apply_type',
+                                                                                 None) else 'fixed_amount',
+            'method': voucher_val.get('method', None) if voucher_val.get('method', None) else 'general',
+            'source': voucher_val.get('source'),
+            'user_id': self.env.user.id
+        }
+        voucher = self.env['pos.voucher'].sudo().create(val)
+        voucher_val.update({
+            'code': voucher.code,
+            'value': voucher.value
+        })
+        return voucher_val
 
     @api.multi
     def get_vouchers_by_order_ids(self, order_ids):
@@ -101,6 +126,7 @@ class pos_voucher(models.Model):
                         'start_date': voucher.end_date,
                         'end_date': voucher.end_date,
                         'id': voucher.id,
+                        'user_id': self.env.user.id
                     })
         return vouchers_data
 

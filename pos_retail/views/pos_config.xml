@@ -282,7 +282,7 @@
                         <page string="Accounting/Invoice">
                             <group>
                                 <field name="management_invoice"/>
-                                <field name="auto_reconcile_payments"/>
+                                <field name="auto_reconcile_payments" invisible="1"/>
                                 <field name="wallet"/>
                                 <field name="management_session"/>
                                 <field name="invoice_offline"/>

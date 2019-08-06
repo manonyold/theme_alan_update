@@ -15,25 +15,25 @@ class pos_session(models.Model):
         ('processing_to_close', 'Processing to Close')
     ])
 
-    @api.multi
-    def action_pos_session_validate(self):
-        for session in self:
-            if session.state == 'processing_to_close' and self.env.user.id != 1:
-                raise UserError('Action processing, please stop click it. Only admin can try ')
-            session._check_pos_session_balance()
-            if not session.config_id.auto_reconcile_payments:
-                session.action_pos_session_close()
-                session.write({
-                    'state': 'closed'
-                })
-            else:
-                session.write({
-                    'state': 'processing_to_close'
-                })
-                self.env.cr.commit()
-                threaded_synchronization = threading.Thread(target=self.auto_action_pos_session_close, args=([], session.id))
-                threaded_synchronization.start()
-        return True
+    # @api.multi
+    # def action_pos_session_validate(self):
+    #     for session in self:
+    #         if session.state == 'processing_to_close' and self.env.user.id != 1:
+    #             raise UserError('Action processing, please stop click it. Only admin can try ')
+    #         session._check_pos_session_balance()
+    #         if not session.config_id.auto_reconcile_payments:
+    #             session.action_pos_session_close()
+    #             session.write({
+    #                 'state': 'closed'
+    #             })
+    #         else:
+    #             session.write({
+    #                 'state': 'processing_to_close'
+    #             })
+    #             self.env.cr.commit()
+    #             threaded_synchronization = threading.Thread(target=self.auto_action_pos_session_close, args=([], session.id))
+    #             threaded_synchronization.start()
+    #     return True
 
     @api.multi
     def auto_action_pos_session_close(self, order_ids=[], session_id=False):

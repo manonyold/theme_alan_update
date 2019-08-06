@@ -63,11 +63,8 @@ odoo.define('pos_retail.shop_logo', function (require) {
                                     }]
                                 }).then(function () {
                                     return self.pos.reload_pos();
-                                }, function (type, err) {
-                                    self.pos.gui.show_popup('dialog', {
-                                        title: 'Error',
-                                        body: 'Odoo connection fail, could not save'
-                                    })
+                                }, function (err) {
+                                    self.pos.query_backend_fail(err);
                                 });
                             }
                         }

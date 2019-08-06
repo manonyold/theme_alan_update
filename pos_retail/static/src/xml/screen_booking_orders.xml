@@ -24,7 +24,7 @@
                                 <div class="row">
                                     <span class="label voucher-label">Signature <span class="input-required"> (*) </span></span>
                                     <div class="col-sm-10">
-                                        <div class="pos_signature"/>
+                                        <div class="pos_signature" name="pos_signature"/>
                                     </div>
                                 </div>
                             </t>
@@ -32,7 +32,7 @@
                                 <span class="label voucher-label">Notes</span>
                                 <div class="col-sm-10">
                                     <div class="form-group label-floating is-empty">
-                                        <input class='form-control sale_order_field note' id="note" t-att-value="widget.pos.get_order().note"/>
+                                        <input class='form-control sale_order_field note' name="note" t-att-value="widget.pos.get_order().note"/>
                                     </div>
                                 </div>
                             </div>
@@ -40,7 +40,7 @@
                                 <label class="label voucher-label">Payment term</label>
                                 <div class="col-sm-7">
                                     <t t-if="widget.pos.payments_term">
-                                        <select class='form-control voucher-select sale_order_field payment_term_id' id="payment_term_id">
+                                        <select class='form-control voucher-select sale_order_field payment_term_id' name="payment_term_id">
                                             <t t-foreach='widget.pos.payments_term' t-as='term'>
                                                 <option t-att-value='term.id' t-att-selected="widget.pos.get_order().get_client()['property_payment_term_id'] ? ((widget.pos.get_order().get_client()['property_payment_term_id'] and widget.pos.get_order().get_client()['property_payment_term_id'][0] === term.id) ? true : undefined) : undefined">
                                                     <t t-esc='term.name'/>
@@ -50,6 +50,7 @@
                                     </t>
                                 </div>
                             </div>
+                            <span class="card-issue"/>
                             <div class="form-footer text-center">
                                 <div class="btn btn-success pull-right confirm">
                                     <i class="fa fa-check"/> Create
@@ -101,7 +102,7 @@
                                 <span class="label voucher-label">Amount total</span>
                                 <div class="col-sm-10">
                                     <div class="form-group label-floating is-empty">
-                                        <input class='form-control' t-att-value="widget.format_currency(widget.pos.get_order().get_total_with_tax())" name="id" hidden="hidden" disabled="disabled"/>
+                                        <input class='form-control' t-att-value="widget.format_currency(widget.pos.get_order().get_total_with_tax())" hidden="hidden" disabled="disabled"/>
                                     </div>
                                 </div>
                             </div>
@@ -141,14 +142,14 @@
                                 <div class="row">
                                     <span class="label voucher-label">Signature <span class="input-required"> (*) </span></span>
                                     <div class="col-sm-10">
-                                        <div class="pos_signature"/>
+                                        <div class="pos_signature" name="pos_signature"/>
                                     </div>
                                 </div>
                             </t>
                             <div class="row">
                                 <span class="label voucher-label">PriceList <span class="input-required"> (*)</span></span>
                                 <div class="col-sm-10">
-                                     <select class='form-control voucher-select' id='pricelist_id'>
+                                     <select class='form-control voucher-select' name='pricelist_id' id="pricelist_id">
                                         <t t-if="widget.pos.pricelists">
                                             <t t-foreach='widget.pos.pricelists' t-as='pricelist'>
                                                 <option t-att-value='pricelist.id' t-att-selected="pricelist['id'] ? ((widget.options.pricelist and pricelist.id === widget.options.pricelist['id']) ? true : undefined) : undefined">
@@ -168,9 +169,9 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <span class="label voucher-label">Payment Journal</span>
+                                <span class="label voucher-label">Payment Partial Journal</span>
                                 <div class="col-sm-10">
-                                     <select class='form-control voucher-select' id='payment_partial_journal_id'>
+                                     <select class='form-control voucher-select' name='payment_partial_journal_id' id="payment_partial_journal_id">
                                         <t t-if="widget.pos.cashregisters">
                                             <t t-foreach='widget.pos.cashregisters' t-as='cashregister'>
                                                 <option t-att-value='cashregister.journal_id[0]'>
@@ -185,7 +186,7 @@
                                 <label class="label voucher-label" style="margin-left: 10px">Payment Method</label>
                                 <div class="col-sm-10">
                                     <div class="form-group label-floating is-empty">
-                                        <select class='form-control voucher-select' id='payment_method_id'>
+                                        <select class='form-control voucher-select' name='payment_method_id' id="payment_method_id">
                                             <t t-if="widget.pos.payment_methods">
                                                 <t t-foreach='widget.pos.payment_methods' t-as='method'>
                                                     <option t-att-value='method.id'>
@@ -197,6 +198,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <span class="card-issue"/>
                             <div class="form-footer text-right">
                                 <div class="btn btn-success pull-right confirm">
                                     <i class="fa fa-check"/> Accept

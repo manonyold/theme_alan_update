@@ -298,7 +298,24 @@ odoo.define('pos_retail.big_data', function (require) {
                 });
                 return status;
             },
-        }
+        },
+        {
+            label: 'syncing with backend',
+            condition: function (self) {
+                return self.config.big_datas;
+            },
+            loaded: function (self) {
+                if (!self.db.write_date_by_model['product.product']) {
+                    return true;
+                }
+                var status = new $.Deferred();
+                self.get_modifiers_backend_all_models().then(function () {
+                    status.resolve()
+                });
+                return status
+            },
+        },
+
     ]);
 
     var _super_Order = models.Order.prototype;
@@ -392,6 +409,9 @@ odoo.define('pos_retail.big_data', function (require) {
         },
         // TODO: when pos session online, if pos session have notification from backend, we get datas modifires and sync to pos
         get_modifiers_backend: function (model) {
+            if (!this.db.write_date_by_model['product.product']) {
+                return true;
+            }
             var self = this;
             var status = new $.Deferred();
             if (this.db.write_date_by_model[model]) {
@@ -424,30 +444,49 @@ odoo.define('pos_retail.big_data', function (require) {
             }
         },
         // TODO: get all modifiers of all models from backend and sync to pos
-        get_modifiers_backend_all_models: function (models) {
+        get_modifiers_backend_all_models: function () {
+            if (!this.db.write_date_by_model['product.product']) {
+                return true;
+            }
+            console.log('-> get_modifiers_backend_all_models');
+            var status = new $.Deferred();
+            var models = [];
+            for (var i = 0; i < this.model_lock.length; i++) {
+                models.push(this.model_lock[i]['model'])
+            }
+            var self = this;
             var model_values = {};
             for (var index in models) {
                 if (this.db.write_date_by_model[models[index]]) {
-                    model_values[models[index]] = this.db.write_date_by_model[models[index]]
+                    model_values[models[index]] = this.db.write_date_by_model[models[index]];
                 }
             }
             if (model_values) {
                 var args = [[], model_values, this.config.id];
-                return rpc.query({
+                rpc.query({
                     model: 'pos.cache.database',
                     method: 'get_modifiers_backend_all_models',
                     args: args
-                }).then(function () {
-                    return true
+                }).then(function (results) {
+                    for (var model in results) {
+                        vals = results[model];
+                        if (vals && vals.length) {
+                            self.sync_with_backend(model, vals);
+                        }
+                        status.resolve();
+                    }
                 }).fail(function (error) {
                     if (error.code == -32098) {
                         console.warn('Your odoo backend offline, or your internet connection have problem');
                     } else {
                         console.warn('Your database have issues, could sync with pos');
                     }
-
+                    status.reject();
                 });
+            } else {
+                status.resolve();
             }
+            return status;
         },
         save_results: function (model, results) { // this method only call when indexdb_db running
             var object = _.find(this.model_lock, function (object_loaded) {
@@ -459,13 +498,13 @@ odoo.define('pos_retail.big_data', function (require) {
             if (model == 'product.product') {
                 this.total_products += results.length;
                 var process_time = this.get_process_time(this.total_products, this.model_ids[model]['max_id']);
-                console.log('save_results products ' + this.total_products);
+                console.log('-> save_results products ' + this.total_products);
                 this.chrome.loading_message(_t('Products loaded: ' + (process_time * 100).toFixed(0) + ' %'), process_time);
             }
             if (model == 'res.partner') {
                 this.total_clients += results.length;
                 var process_time = this.get_process_time(this.total_clients, this.model_ids[model]['max_id']);
-                console.log('save_results clients ' + this.total_clients);
+                console.log('-> save_results clients ' + this.total_clients);
                 this.chrome.loading_message(_t('Partners loaded: ' + (process_time * 100).toFixed(0) + ' %'), process_time);
             }
             this.load_indexed_db_done = true;
@@ -575,7 +614,7 @@ odoo.define('pos_retail.big_data', function (require) {
                                         return $.when(self.api_install_datas('pos.order.line')).then(function () {
                                             return $.when(self.api_install_datas('sale.order')).then(function () {
                                                 return $.when(self.api_install_datas('sale.order.line')).then(function () {
-                                                    return true;
+                                                    return self.get_modifiers_backend_all_models();
                                                 })
                                             })
                                         })
@@ -586,16 +625,6 @@ odoo.define('pos_retail.big_data', function (require) {
                     })
                 } else {
                     return true;
-                }
-            }).then(function () {
-                if (self.config.big_datas) {
-                    var list_model = [];
-                    for (var i = 0; i < self.model_lock.length; i++) {
-                        list_model.push(self.model_lock[i]['model'])
-                    }
-                    self.get_modifiers_backend_all_models(list_model).done(function () {
-                        self.set('sync_backend', {state: 'connected', pending: 0});
-                    });
                 }
             })
         }

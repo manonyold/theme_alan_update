@@ -145,3 +145,9 @@
 - [x] Improve keyboard Shortcut
 - [x] From any screens, back to products screen, add event keyboard back
 - [x] Turn off sync when big datas field is unchecked
+
+***7.4.0.1***
+- [x] Not allow input birthday date bigger than now
+- [x] Refactor .fail(error, type) to .fail(error)
+- [x] Each popup, add textbox message issue (show why issue)
+- [x] Allow order return and create 1 voucher with line selected

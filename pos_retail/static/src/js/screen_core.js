@@ -336,6 +336,57 @@ odoo.define('pos_retail.screens', function (require) {
     });
 
     screens.ScreenWidget.include({
+        _check_is_duplicate: function (field_value, field_string, id) {
+            var partners = this.pos.db.get_partners_sorted(-1);
+            if (id) {
+                var old_partners = _.filter(partners, function (partner_check) {
+                    return partner_check['id'] != id && partner_check[field_string] == field_value;
+                });
+                if (old_partners.length != 0) {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                var old_partners = _.filter(partners, function (partner_check) {
+                    return partner_check[field_string] == field_value;
+                });
+                if (old_partners.length != 0) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        },
+        validate_date_field: function (value, $el) {
+            if (value.match(/^\d{4}$/) !== null) {
+                $el.val(value + '-');
+            } else if (value.match(/^\d{4}\/\d{2}$/) !== null) {
+                $el.val(value + '-');
+            }
+        },
+        check_is_number: function (number) {
+            var regex = /^[0-9]+$/;
+            if (number.match(regex)) {
+                return true
+            } else {
+                return false
+            }
+        },
+        wrong_input: function (element, message) {
+            if (message) {
+                this.$("span[class='card-issue']").text(message);
+            }
+            this.$el.find(element).css({
+                'box-shadow': '0px 0px 0px 1px rgb(236, 5, 5) inset',
+                'border': 'red !important'
+            });
+        },
+        passed_input: function (element) {
+            this.$el.find(element).css({
+                'box-shadow': '0px 0px 0px 1px rgb(34, 206, 3) inset'
+            })
+        },
         show: function () {
             var self = this;
             this._super();

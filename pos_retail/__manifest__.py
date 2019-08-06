@@ -1,6 +1,6 @@
 {
     'name': "POS All In One Futures (Shop & Restaurant)",
-    'version': '7.4.0.0',
+    'version': '7.4.0.1',
     'category': 'Point of Sale',
     'author': 'TL Technology',
     'live_test_url': 'http://posodoo.com/web/signup',
@@ -21,6 +21,7 @@
     'demo': ['demo/demo_data.xml'],
     'data': [
         'security/ir.model.access.csv',
+        'security/group.xml',
         'views/pos_menu.xml',
         'reports/pos_lot_barcode.xml',
         'reports/pos_tracking_client.xml',
@@ -39,7 +40,7 @@
         'views/pos_config.xml',
         'views/pos_config_image.xml',
         'views/pos_session.xml',
-        'views/product.xml',
+        # 'views/product_template.xml',
         'views/pos_order.xml',
         'views/sale_order.xml',
         'views/pos_loyalty.xml',
