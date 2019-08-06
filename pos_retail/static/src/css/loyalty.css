@@ -9,6 +9,7 @@
     font-size: 14px;
     color: black;
     border: 1px solid #000000;
+    border-top: none;
 }
 .pos .loyalty-table {
     background: #ffffff;

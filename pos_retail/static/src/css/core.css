@@ -1,13 +1,13 @@
 .pos {
-    font-family: 'Roboto', Roboto, Arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pos.pos-content {
-    font-family: 'Roboto', Roboto, Arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pos.mobile .leftpane {
-    font-family: 'Roboto', Roboto, Arial, sans-serif;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .pos .search_products {
@@ -314,6 +314,7 @@
 
 .pos .popup .title {
     border-bottom: 1px solid #393939;
+    color: #000000;
 }
 
 .pos .lot-add {
@@ -774,8 +775,8 @@
 .pos .popup input, .pos .popup-input {
     width: 90%;
     border-radius: 3px;
-    border: 1px solid #555555;
-    border-bottom: 1px solid #555555 !important;
+    /*border: 1px solid #555555;*/
+    /*border-bottom: 1px solid #555555 !important;*/
     color: #000000;
 }
 
@@ -2016,8 +2017,8 @@ select.form-control {
     max-width: 300px;
     background: rgb(255, 255, 255);
     font-size: 16px;
-    border: solid 1px #999999 !important;
-    padding: 10px;
+    border: none;
+    padding: 5px;
 }
 
 .pos .label {
@@ -2617,7 +2618,13 @@ select.form-control {
 .pos .paymentline .col-name {
     font-weight: 600;
 }
-
+.pos .card-issue {
+    color: #E91E63;
+    font-size: 15px;
+    font-weight: 400;
+    text-transform: uppercase;
+    border-bottom: 1px solid;
+}
 .pos .add-new-customer {
     position: absolute;
     margin-left: -25px;

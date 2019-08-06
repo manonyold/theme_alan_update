@@ -33,8 +33,8 @@
                     <li class="button">Add New Order <span class="guide">n</span></li>
                     <li class="button">Remove Current Order <span class="guide">r</span></li>
                     <li class="button">Add New Customer <span class="guide">a</span></li>
-                    <li class="button">Add New Product <span class="guide">w</span></li>
-                    <li class="button">Add New POS Category <span class="guide">e</span></li>
+                    <li class="button">Add New Product <span class="guide">e</span></li>
+                    <li class="button">Add New POS Category <span class="guide">w</span></li>
                     <li class="button">Switch Product View <span class="guide">v</span></li>
                     <li class="button">Show/Hide Buttons Layout <span class="guide">b</span></li>
                     <li class="button">Show/Hide Numpad Layout <span class="guide">h</span></li>

@@ -18,6 +18,7 @@ class pos_controller(PosController):
 
     @http.route('/pos/web', type='http', auth='user')
     def pos_web(self, debug=False, **k):
+        _logger.info('--> begin start pos session of user: %s' % request.env.user.login)
         session_info = request.env['ir.http'].session_info()
         server_version_info = session_info['server_version_info'][0]
         pos_sessions = None

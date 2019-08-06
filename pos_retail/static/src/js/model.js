@@ -17,52 +17,6 @@ odoo.define('pos_retail.model', function (require) {
 
     var _super_PosModel = models.PosModel.prototype;
     models.PosModel = models.PosModel.extend({
-        _check_unique_phone: function (phone, partner_id) {
-            if (partner_id) {
-                var old_partners = _.filter(this.db.partners, function (partner_check) {
-                    return partner_check['id'] != partner_id && partner_check['phone'] == fields['phone'];
-                });
-                if (old_partners.length != 0) {
-                    return this.pos.gui.show_popup('dialog', {
-                        title: 'Warning',
-                        body: 'Phone have used before, your phone input of other client ' + old_partners[0]['name']
-                    })
-                }
-            } else {
-                var old_partners = _.filter(this.db.partners, function (partner_check) {
-                    return partner_check['phone'] == fields['phone'];
-                });
-                if (old_partners.length != 0) {
-                    return this.pos.gui.show_popup('dialog', {
-                        title: 'Warning',
-                        body: 'Phone have used before, your phone input of other client ' + old_partners[0]['name']
-                    })
-                }
-            }
-        },
-        _check_unique_email: function (phone, partner_id) {
-            if (partner_id) {
-                    var old_partners = _.filter(this.db.partners, function (partner_check) {
-                        return partner_check['id'] != partner_id && partner_check['email'] == fields['email'];
-                    });
-                    if (old_partners.length != 0) {
-                        return this.pos.gui.show_popup('dialog', {
-                            title: 'Warning',
-                            body: 'Email is duplicated with other customer' + old_partners[0]['name']
-                        })
-                    }
-                } else {
-                    var old_partners = _.filter(this.db.partners, function (partner_check) {
-                        return partner_check['email'] == fields['email'];
-                    });
-                    if (old_partners.length != 0) {
-                        return this.pos.gui.show_popup('dialog', {
-                            title: 'Warning',
-                            body: 'Email is duplicated with other customer' + old_partners[0]['name']
-                        })
-                    }
-                }
-        },
         _search_read_by_model_and_id: function (model, ids) {
             var status = new $.Deferred();
             var object = this.get_model(model);
@@ -82,7 +36,8 @@ odoo.define('pos_retail.model', function (require) {
             }
             return status
 
-        },
+        }
+        ,
         _update_cart_qty_by_order: function (product_ids) {
             var order = this.get_order();
             if (!order) {
@@ -105,7 +60,8 @@ odoo.define('pos_retail.model', function (require) {
                 }
             }
 
-        },
+        }
+        ,
         _get_active_pricelist: function () {
             var current_order = this.get_order();
             var default_pricelist = this.default_pricelist;
@@ -124,11 +80,13 @@ odoo.define('pos_retail.model', function (require) {
                     return null
                 }
             }
-        },
+        }
+        ,
         _get_default_pricelist: function () {
             var current_pricelist = this.default_pricelist;
             return current_pricelist
-        },
+        }
+        ,
         get_model: function (_name) {
             var _index = this.models.map(function (e) {
                 return e.model;
@@ -137,7 +95,8 @@ odoo.define('pos_retail.model', function (require) {
                 return this.models[_index];
             }
             return false;
-        },
+        }
+        ,
         initialize: function (session, attributes) {
             var self = this;
             this.server_version = session.server_version_info[0];
@@ -252,7 +211,8 @@ odoo.define('pos_retail.model', function (require) {
             });
             var wait_res_company = this.get_model('res.company');
             wait_res_company.fields.push('logo');
-        },
+        }
+        ,
         add_new_order: function () {
             var self = this;
             _super_PosModel.add_new_order.apply(this, arguments);
@@ -272,7 +232,8 @@ odoo.define('pos_retail.model', function (require) {
                     self.gui.show_screen('clientlist');
                 }, 500);
             }
-        },
+        }
+        ,
         formatDateTime: function (value, field, options) {
             if (value === false) {
                 return "";
@@ -281,7 +242,8 @@ odoo.define('pos_retail.model', function (require) {
                 value = value.clone().add(session.getTZOffset(value), 'minutes');
             }
             return value.format(time.getLangDatetimeFormat());
-        },
+        }
+        ,
         format_date: function (date) { // covert datetime backend to pos
             if (date) {
                 return this.formatDateTime(
@@ -289,17 +251,20 @@ odoo.define('pos_retail.model', function (require) {
             } else {
                 return ''
             }
-        },
+        }
+        ,
         get_config: function () {
             return this.config;
-        },
+        }
+        ,
         get_packaging_by_product: function (product) {
             if (!this.packaging_by_product_id || !this.packaging_by_product_id[product.id]) {
                 return false;
             } else {
                 return true
             }
-        },
+        }
+        ,
         get_location: function () {
             if (!this.location) {
                 var location = this.stock_location_by_id[this.config.stock_location_id[0]];
@@ -313,10 +278,12 @@ odoo.define('pos_retail.model', function (require) {
             } else {
                 return this.location;
             }
-        },
+        }
+        ,
         set_location: function (location) {
             this.location = location;
-        },
+        }
+        ,
         /*
             We not use exports.Product because if you have 1 ~ 10 millions data products
             Original function odoo will crashed browse memory
@@ -385,7 +352,8 @@ odoo.define('pos_retail.model', function (require) {
                 return false;
             });
             return price;
-        },
+        }
+        ,
         /*
             This function return product amount with default tax set on product > sale > taxes
          */
@@ -429,23 +397,26 @@ odoo.define('pos_retail.model', function (require) {
             } else {
                 return price
             }
-        },
+        }
+        ,
         get_bus_location: function () {
             return this.bus_location
-        },
-        query_backend_fail: function (type, error) {
-            if (type && type.code === 200 && type.message && type.data && type.data.message) {
-                return this.gui.show_popup('dialog', {
-                    title: type.message,
-                    body: type.data.message,
+        }
+        ,
+        query_backend_fail: function (error) {
+            if (error && error.code === 200 && error.data && error.data.message) {
+                return this.gui.show_popup('confirm', {
+                    title: error.message,
+                    body: error.data.message,
                 })
             } else {
-                return this.gui.show_popup('dialog', {
+                return this.gui.show_popup('confirm', {
                     title: 'Error',
-                    body: 'Odoo offline mode',
+                    body: 'Odoo offline mode or backend codes have issues. Please contact your admin system',
                 })
             }
-        },
+        }
+        ,
         scan_product: function (parsed_code) {
             /*
                     This function only return true or false
@@ -684,17 +655,20 @@ odoo.define('pos_retail.model', function (require) {
                 }
             }
             return _super_PosModel.scan_product.apply(this, arguments);
-        },
+        }
+        ,
         set_table: function (table) {
             _super_PosModel.set_table.apply(this, arguments);
             this.trigger('update:table-list');
-        },
+        }
+        ,
         _save_to_server: function (orders, options) {
             if (this.hide_pads) {
                 $('.pad').click();
             }
             return _super_PosModel._save_to_server.call(this, orders, options);
-        },
+        }
+        ,
         push_order: function (order, opts) {
             var pushed = _super_PosModel.push_order.apply(this, arguments);
             if (!order) {
@@ -715,15 +689,18 @@ odoo.define('pos_retail.model', function (require) {
                 }
             }
             return pushed;
-        },
+        }
+        ,
         get_balance: function (client) {
             var balance = round_pr(client.balance, this.currency.rounding);
             return (Math.round(balance * 100) / 100).toString()
-        },
+        }
+        ,
         get_wallet: function (client) {
             var wallet = round_pr(client.wallet, this.currency.rounding);
             return (Math.round(wallet * 100) / 100).toString()
-        },
+        }
+        ,
         add_return_order: function (order, lines) {
             var self = this;
             var order_return_id = order['id'];
@@ -803,7 +780,7 @@ odoo.define('pos_retail.model', function (require) {
                         'timer': 2500,
                     });
                     def.resolve()
-                }).fail(function (type, error) {
+                }).fail(function (error) {
                     def.reject(error)
                 });
             } else {
@@ -825,7 +802,8 @@ odoo.define('pos_retail.model', function (require) {
                 def.resolve()
             }
             return def;
-        },
+        }
+        ,
         set_start_order: function () { // lock unlock order
             var self = this;
             var res = _super_PosModel.set_start_order.apply(this, arguments);
@@ -867,7 +845,8 @@ odoo.define('pos_retail.model', function (require) {
             if (this.config.staff_level == 'manager') {
                 $('.deleteorder-button').removeClass('oe_hidden');
             }
-        },
+        }
+        ,
         load_server_data: function () {
             var self = this;
             return _super_PosModel.load_server_data.apply(this, arguments).then(function () {
@@ -894,7 +873,8 @@ odoo.define('pos_retail.model', function (require) {
                     }
                 });
             })
-        },
+        }
+        ,
         load_server_data_by_model: function (model) {
             var self = this;
             var loaded = new $.Deferred();
@@ -944,7 +924,7 @@ odoo.define('pos_retail.model', function (require) {
         }
     });
 
-    // validate click change minus
+// validate click change minus
     var _super_NumpadState = models.NumpadState.prototype;
     models.NumpadState = models.NumpadState.extend({
         switchSign: function () {
@@ -977,7 +957,7 @@ odoo.define('pos_retail.model', function (require) {
         }
     });
 
-    // only v11 and 12
+// only v11 and 12
     var _super_product = models.Product.prototype;
     models.Product = models.Product.extend({
         get_price: function (pricelist, quantity) {
@@ -988,4 +968,5 @@ odoo.define('pos_retail.model', function (require) {
             }
         }
     })
-});
+})
+;

@@ -100,7 +100,7 @@
         <t t-if="widget.pos.config.product_view == 'list'">
             <tr class='product-list' t-att-data-product-id="product.id" t-att-data-product-tmpl-id="product.product_tmpl_id">
                 <td>
-                    <t t-if="widget.pos.config.display_image_product">
+                    <t t-if="!widget.pos.config.hide_product_image">
                         <img class='product_list_image' t-att-src='image_url'/>
                     </t>
                 </td>
@@ -140,7 +140,7 @@
         <t t-if="widget.pos.config.product_view == 'box'">
             <article class='product' t-att-data-product-id="product.id" tabindex="0" t-attf-aria-labelledby="article_product_#{product.id}"> <!-- v12 used article -->
                 <t t-set="out_stock" t-value="product.qty_available == 0 or !product.qty_available or product.qty_available &lt; 0"/>
-                <t t-if="widget.pos.config.display_image_product">
+                <t t-if="!widget.pos.config.hide_product_image">
                     <div class="product-img">
                         <img t-att-src='image_url' />
                     </div>

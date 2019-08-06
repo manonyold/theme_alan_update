@@ -44,43 +44,22 @@ odoo.define('pos_retail.screen_pos_orders', function (require) {
                     }
                 });
                 this.$('.confirm_return_order').click(function () {
-                    if (self.line_selected == [] || !self.order) {
-                        self.pos.gui.show_popup('dialog', {
-                            title: _t('Error'),
-                            body: 'Please select lines need return from request of customer',
-                        });
+                    if (self.line_selected == [] || !self.order || self.line_selected.length == 0) {
+                        return self.wrong_input("div[class='table-responsive']", "(*) Please select minimum 1 line for return")
                     } else {
                         self.pos.add_return_order(self.order, self.line_selected);
                         return self.pos.gui.show_screen('payment');
                     }
                 });
                 this.$('.create_voucher').click(function () { // create voucher when return order
-                    if (self.line_selected == [] || !self.order) {
-                        self.pos.gui.show_popup('dialog', {
-                            title: _t('Error'),
-                            body: 'Please select lines need return',
-                        });
+                    if (self.line_selected == [] || !self.order || self.line_selected.length == 0) {
+                        return self.wrong_input("div[class='table-responsive']", "(*) Please select minimum 1 line for return")
                     } else {
-                        var order = new models.Order({}, {pos: self.pos});
-                        order['create_voucher'] = true;
-                        self.pos.gui.show_screen('payment');
-                        order['is_return'] = true;
-                        self.pos.get('orders').add(order);
-                        self.pos.set('selectedOrder', order);
-                        for (var i = 0; i < self.line_selected.length; i++) {
-                            var line_return = self.line_selected[i];
-                            var product_id = line_return['product_id'][0];
-                            var product = self.pos.db.get_product_by_id(product_id);
-                            if (product) {
-                                var line = new models.Orderline({}, {pos: self.pos, order: order, product: product});
-                                line['is_return'] = true;
-                                order.orderlines.add(line);
-                                var price_unit = line_return['price_unit'];
-                                line.set_unit_price(price_unit);
-                                line.set_quantity(-line_return['qty'], 'keep price');
-                            }
-                        }
-                        return self.gui.show_screen('payment');
+                        return self.gui.show_popup('popup_manual_create_voucher', {
+                            title: 'Voucher Card',
+                            order: self.order,
+                            line_selected: self.line_selected
+                        })
 
                     }
 
@@ -136,10 +115,8 @@ odoo.define('pos_retail.screen_pos_orders', function (require) {
         },
         refresh_screen: function () {
             var self = this;
-            self.pos.get_modifiers_backend('pos.order').then(function () {
-                self.pos.get_modifiers_backend('pos.order.line').then(function () {
-                    self.pos.trigger('refresh:pos_orders_screen');
-                });
+            this.pos.get_modifiers_backend_all_models().then(function () {
+                self.pos.trigger('refresh:pos_orders_screen');
             });
         },
         renderElement: function () {
@@ -404,8 +381,8 @@ odoo.define('pos_retail.screen_pos_orders', function (require) {
                                         self.pos.gui.close_popup();
                                     }
                                 });
-                            }).fail(function (type, error) {
-                                return self.pos.query_backend_fail(type, error);
+                            }).fail(function (error) {
+                                return self.pos.query_backend_fail(error);
                             });
                         },
                         cancel: function () {
@@ -515,8 +492,8 @@ odoo.define('pos_retail.screen_pos_orders', function (require) {
                             });
                             self.render_pos_order_list(orders);
                             return self.pos.gui.close_popup();
-                        }).fail(function (type, error) {
-                            return self.pos.query_backend_fail(type, error);
+                        }).fail(function (error) {
+                            return self.pos.query_backend_fail(error);
                         })
                     },
                     cancel: function () {

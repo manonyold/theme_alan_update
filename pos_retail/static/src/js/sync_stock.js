@@ -33,7 +33,7 @@ odoo.define('pos_retail.sync_stock', function (require) {
                     self.gui.screen_instances["products_operation"].refresh_screen();
                 }
                 return def.resolve()
-            }).fail(function (type, error) {
+            }).fail(function (error) {
                 return def.resolve(error);
             });
             return def;

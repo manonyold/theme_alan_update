@@ -38,6 +38,7 @@
                                                 </t>
                                             </select>
                                         </div>
+                                        <span class="card-issue"/>
                                         <div class="form-footer text-center">
                                             <div class="btn btn-success pull-right confirm">
                                                 Create
@@ -116,6 +117,7 @@
                                                  <option value='product'>StockAble Product</option>
                                             </select>
                                         </div>
+                                        <span class="card-issue"/>
                                         <div class="form-footer text-center">
                                             <div class="btn btn-success pull-right confirm">
                                                 Create
@@ -144,6 +146,7 @@
                                 <t t-esc="widget.options.title"/>
                             </t>
                         </h4>
+                        <span class="card-issue"/>
                         <div class="table-responsive">
                             <div class='body'>
                             </div>
@@ -251,6 +254,7 @@
                 <input class='form-control detail' name='name' t-att-value='product.name' placeholder='Name'></input>
             </div>
             <div class='client-details-box clearfix'>
+                <span class="card-issue"/>
                 <div class='client-details-left'>
                     <div class='client-detail' hidden="hidden" disabled="disabled">
                         <span class='label'>ID</span>
@@ -306,6 +310,7 @@
                         <input class='form-control detail' name='barcode' t-att-value="product.barcode ||  ''" placeholder='Barcode'></input>
                     </div>
                 </div>
+                <span class="card-issue"/>
                 <div class='client-details-right'>
                     <div class="client-detail">
                         <span class='label'>Save</span>

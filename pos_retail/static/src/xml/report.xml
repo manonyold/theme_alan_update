@@ -7,40 +7,6 @@
         </div>
     </t>
 
-
-<!--    <t t-name="button_report_product_summary">-->
-<!--        <div class="left_button">-->
-<!--            <div class="button-icon">-->
-<!--                <img src="/pos_retail/static/src/icons/report.png" class="pos_logo"/>-->
-<!--            </div>-->
-<!--            <div class="button-name">-->
-<!--                Product Report-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </t>-->
-
-<!--    <t t-name="button_report_order_summary">-->
-<!--        <div class="left_button">-->
-<!--            <div class="button-icon">-->
-<!--                <img src="/pos_retail/static/src/icons/report.png" class="pos_logo"/>-->
-<!--            </div>-->
-<!--            <div class="button-name">-->
-<!--                Order Report-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </t>-->
-
-<!--    <t t-name="button_report_payment_summary">-->
-<!--        <div class="left_button">-->
-<!--            <div class="button-icon">-->
-<!--                <img src="/pos_retail/static/src/icons/report.png" class="pos_logo"/>-->
-<!--            </div>-->
-<!--            <div class="button-name">-->
-<!--                Payment Report-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </t>-->
-
     <t t-name="popup_report_payment_summary">
         <div class="modal-dialog">
             <div class="popup touch-scrollable scrollable-y"
@@ -91,6 +57,7 @@
                                 </div>
                             </div>
                         </div>
+                        <span class="card-issue"/>
                         <div class="form-footer text-right">
                             <div class="btn btn-success pull-right confirm">
                                 Print
@@ -178,6 +145,7 @@
                                 </div>
                             </div>
                         </div>
+                        <span class="card-issue"/>
                         <div class="form-footer text-right">
                             <div class="btn btn-success pull-right confirm">
                                 Print
@@ -259,6 +227,7 @@
                                 </div>
                             </div>
                         </div>
+                        <span class="card-issue"/>
                         <div class="form-footer text-right">
                             <div class="btn btn-success pull-right confirm">
                                 Print

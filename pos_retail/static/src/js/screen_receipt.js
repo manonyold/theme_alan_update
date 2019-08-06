@@ -271,9 +271,9 @@ odoo.define('pos_retail.screen_receipt', function (require) {
                     }
                     self.auto_next_screen();
                     invoiced.resolve();
-                }).fail(function (type, error) {
+                }).fail(function (error) {
                     invoiced.reject(error);
-                    return self.pos.query_backend_fail(type, error);
+                    return self.pos.query_backend_fail(error);
                 });
                 return invoiced;
             } else {

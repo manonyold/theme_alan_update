@@ -159,6 +159,7 @@
                             <span class='label voucher-label'>Note description</span>
                             <input type="text" class="popup-lot internal_transfer_field" id="note" placeholder="Note"/>
                         </div>
+                        <span class="card-issue"/>
                         <div class="form-footer text-right">
                             <div class="btn btn-success pull-right confirm">
                                 Create
@@ -180,18 +181,16 @@
                     <div class="card">
                         <t t-if="widget.options.invoice">
                             <h4 class="card-title">
-                                <t t-if="widget.options.invoice.number">
-                                    <t t-esc="widget.options.invoice.number"/>
-                                </t>
+                                <t t-esc="widget.options.invoice.number"/>
                             </h4>
                         </t>
                         <div class="card-content">
                             <t t-if="widget.options.invoice">
                                 <div class="row">
-                                    <label class="label voucher-label">Refund method</label>
+                                    <label class="label voucher-label">Refund Method</label>
                                     <div class="col-sm-10">
                                         <div class="form-group label-floating is-empty">
-                                            <select class='form-control voucher-select detail' id='filter_refund'>
+                                            <select class='form-control voucher-select field' name='filter_refund'>
                                                 <option value='refund'>
                                                     Create a draft credit note
                                                 </option>
@@ -209,29 +208,29 @@
                                     <label class="label voucher-label">Reason</label>
                                     <div class="col-sm-10">
                                         <div class="form-group label-floating is-empty">
-                                            <input type="text" class="form-control" id="description"/>
+                                            <input type="text" class="form-control field" name="description"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="label voucher-label">Credit Note Date  <i class="fa fa-calendar"></i></label>
+                                    <div class="col-sm-10">
+                                        <div class="form-group label-floating is-empty">
+                                            <input type="text" class="form-control datepicker field" name="date_invoice"/>
 
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <label class="label voucher-label">Credit note date  <i class="fa fa-calendar"></i></label>
+                                    <label class="label voucher-label">Accounting Date  <i class="fa fa-calendar"></i></label>
                                     <div class="col-sm-10">
                                         <div class="form-group label-floating is-empty">
-                                            <input type="text" class="form-control datepicker" id="date_invoice"/>
+                                            <input type="text" class="form-control datepicker field" name="date"/>
 
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <label class="label voucher-label">Accounting date  <i class="fa fa-calendar"></i></label>
-                                    <div class="col-sm-10">
-                                        <div class="form-group label-floating is-empty">
-                                            <input type="text" class="form-control datepicker" id="date"/>
-
-                                        </div>
-                                    </div>
-                                </div>
+                                <span class="card-issue"/>
                                 <div class="form-footer text-center">
                                     <div class="btn btn-success pull-right confirm">
                                         Add Credit Note
@@ -256,8 +255,8 @@
                 <div class="card">
                     <div class="card-content">
                         <h4 class="card-title">
-                            <t t-if="widget.options.title">
-                                Register amount: <t t-esc="widget.options.invoice.number"/>
+                            <t t-if="widget.options.invoice">
+                                Invoice Number: <t t-esc="widget.options.invoice.number"/>
                             </t>
                         </h4>
                         <t t-if="widget.options.invoice">
@@ -265,7 +264,7 @@
                                 <label class="label voucher-label">Residual</label>
                                 <div class="col-sm-10">
                                     <div class="form-group label-floating is-empty">
-                                        <input type="number" class="form-control" t-att-value="widget.options.invoice.residual" id="residual"/>
+                                        <input type="number" class="form-control field" t-att-value="widget.options.invoice.residual" name="residual"/>
 
                                     </div>
                                 </div>
@@ -273,7 +272,7 @@
                             <div class="row">
                                 <span class="label voucher-label">Payment Journal</span>
                                 <div class="col-sm-10">
-                                     <select class='form-control voucher-select' id='journal_id'>
+                                     <select class='form-control voucher-select field' name='journal_id'>
                                         <t t-if="widget.pos.cashregisters">
                                             <t t-foreach='widget.pos.cashregisters' t-as='cashregister'>
                                                 <option t-att-value='cashregister.journal_id[0]'>
@@ -286,6 +285,7 @@
                             </div>
                         </t>
                     </div>
+                    <span class="card-issue"/>
                     <div class="form-footer text-center">
                         <div class="btn btn-success pull-right confirm">
                             Register
@@ -313,7 +313,7 @@
                         <div class="row">
                             <label class="label voucher-label">Currency <span class="input-required"> (*) </span></label>
                             <div class="col-sm-7">
-                                 <select class='form-control voucher-select detail' id='po_currency_id'>
+                                 <select class='form-control voucher-select po-field' name='currency_id'>
                                     <t t-if="widget.pos.currencies">
                                         <t t-foreach='widget.pos.currencies' t-as='currency'>
                                             <option t-att-value='currency.id' t-att-selected="currency['id'] ? ((currency['id'] === widget.pos.currency.id) ? true : undefined) : undefined">
@@ -328,7 +328,7 @@
                             <label class="label voucher-label">Note</label>
                             <div class="col-sm-10">
                                 <div class="form-group detail">
-                                    <input class='form-control detail' id="purchase_order_note"/>
+                                    <input class='form-control po-field' name="note"/>
                                 </div>
                             </div>
                         </div>
@@ -336,7 +336,7 @@
                             <label class='label voucher-label'>Scheduled date  <i class="fa fa-calendar"></i> <span class="input-required"> (*) </span></label>
                             <div class="col-sm-7">
                                 <div class="form-group detail">
-                                    <input class="form-control detail datetimepicker" id="date_planned"/>
+                                    <input class="form-control po-field datetimepicker" name="date_planned"/>
                                 </div>
                             </div>
                         </div>
@@ -344,7 +344,7 @@
                             <label class="label voucher-label">Bill Journal  <span class="input-required"> (*) </span></label>
                             <div class="col-sm-7">
                                 <t t-if="widget.options.cashregisters">
-                                    <select class='form-control voucher-select' id='journal_id'>
+                                    <select class='form-control voucher-select po-field' name='journal_id'>
                                         <t t-foreach='widget.options.cashregisters' t-as='cashregister'>
                                             <option t-att-value='cashregister.journal_id[0]'>
                                                 <t t-esc='cashregister.journal_id[1]'/>
@@ -359,11 +359,12 @@
                             <div class="row">
                                 <label class="label voucher-label">Signature  <span class="input-required"> (*) </span></label>
                                 <div class="col-sm-10">
-                                    <div class="pos_signature"/>
+                                    <div class="pos_signature" name="pos_signature"/>
                                 </div>
                             </div>
                         </t>
                     </div>
+                    <span class="card-issue"/>
                     <div class="form-footer text-center">
                         <div class="btn btn-success pull-right create-purchase-order">
                             <i class="fa fa-check"/> Create
@@ -802,112 +803,6 @@
         </t>
     </t>
 
-    <t t-name="popup_create_customer">
-        <div class="modal-dialog">
-            <div class="popup touch-scrollable scrollable-y" style="max-height: 600px;min-height: 300px;height: fit-content;">
-                <t t-if="widget.title">
-                    <p class="title"><t t-esc="widget.title"/></p>
-                </t>
-                <div class="content">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card create_partner">
-                                    <div class="card-content">
-                                        <h4 class="card-title">Create Partner</h4>
-                                        <div class="col-md-4 col-sm-4">
-                                            <div class="form-group label-floating">
-                                                <div class='client-picture'>
-                                                    <t><i class='fa fa-camera'></i></t>
-                                                    <input type='file' class='image-uploader'></input>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Name<span class="input-required"> (*)</span></span>
-                                            <input class="form-control partner_input" name="name" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Street</span>
-                                            <input class="form-control partner_input" name="street" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>City</span>
-                                            <input class="form-control partner_input" name="city" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Postcode</span>
-                                            <input class="form-control partner_input" name="zip" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Email</span>
-                                            <input class="form-control partner_input" name="email" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Phone</span>
-                                            <input class="form-control partner_input" name="phone" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Mobile</span>
-                                            <input class="form-control partner_input" name="mobile" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Barcode</span>
-                                            <input class="form-control partner_input" name="barcode" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Tax ID</span>
-                                            <input class="form-control partner_input" name="vat" required="true" />
-                                        </div>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Partner Type</span>
-                                            <select class='form-control voucher-select partner_input' name='partner_type'>
-                                                <option value='customer'>is Customer</option>
-                                                <option value='vendor'>is Vendor</option>
-                                                <option value='customer_and_vendor'>is Customer and Vendor</option>
-                                            </select>
-                                        </div>
-                                        <t t-if="widget.pos.pricelists">
-                                            <div class="form-group label-floating">
-                                                <span class='label voucher-label'>Pricelist</span>
-                                                <select class='form-control voucher-select partner_input' name='property_product_pricelist'>
-                                                     <t t-foreach='widget.pos.pricelists' t-as='pricelist'>
-                                                        <option t-att-value='pricelist.id'>
-                                                            <t t-esc='pricelist.display_name'/>
-                                                        </option>
-                                                    </t>
-                                                </select>
-                                            </div>
-                                        </t>
-                                        <div class="form-group label-floating">
-                                            <span class='label voucher-label'>Country</span>
-                                            <select class='form-control voucher-select partner_input' name='country_id'>
-                                                <option value=''>None</option>
-                                                <t t-foreach='widget.pos.countries' t-as='country'>
-                                                    <option t-att-value='country.id'>
-                                                        <t t-esc='country.name'/>
-                                                    </option>
-                                                </t>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-footer text-center">
-                                        <div class="btn btn-success pull-right confirm">
-                                            Create
-                                        </div>
-                                        <div class="btn btn-danger pull-left cancel">
-                                            Close
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </t>
-
     <t t-name="popup_set_guest">
         <div class="modal-dialog">
             <div class="popup touch-scrollable scrollable-y">
@@ -943,6 +838,7 @@
                                 </div>
                             </div>
                         </div>
+                        <span class="card-issue"/>
                         <div class="form-footer text-center">
                             <div class="btn btn-success pull-right confirm">
                                 Set

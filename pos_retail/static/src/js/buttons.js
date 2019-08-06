@@ -619,8 +619,8 @@ odoo.define('pos_retail.buttons', function (require) {
                         return self.pos.gui.close_popup();
                     }
                 });
-            }).fail(function (type, error) {
-                return self.pos.query_backend_fail(type, error);
+            }).fail(function (error) {
+                return self.pos.query_backend_fail(error);
             })
         }
     });

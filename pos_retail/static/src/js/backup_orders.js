@@ -152,11 +152,8 @@ odoo.define('pos_retail.backup_orders', function (require) {
                             color: 'info'
                         })
                     }
-                }, function (type, err) {
-                    self.pos.gui.show_popup('dialog', {
-                        title: 'Error',
-                        body: 'Odoo connection fail, could not save'
-                    })
+                }, function (err) {
+                    self.pos.query_backend_fail(err);
                 });
             });
 
@@ -194,11 +191,8 @@ odoo.define('pos_retail.backup_orders', function (require) {
                             body: 'Nothing order restore'
                         })
                     }
-                }, function (type, err) {
-                    self.pos.gui.show_popup('dialog', {
-                        title: 'Error',
-                        body: 'Odoo connection fail, could not save'
-                    })
+                }, function (err) {
+                    self.pos.query_backend_fail(err);
                 });
             });
 

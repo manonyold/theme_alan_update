@@ -167,8 +167,8 @@ odoo.define('pos_retail.create_lots', function (require) {
                             body: 'Your lots have added to backend and pos. You can use it now',
                             color: 'success'
                         })
-                    }).fail(function (type, error) {
-                        return self.pos.query_backend_fail(type, error);
+                    }).fail(function (error) {
+                        return self.pos.query_backend_fail(error);
                     });
                 }
             })

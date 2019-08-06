@@ -9,6 +9,9 @@ odoo.define('pos_retail.screen_voucher', function (require) {
     var rpc = require('pos.rpc');
     var models = require('point_of_sale.models');
     var screens = require('point_of_sale.screens');
+    var utils = require('web.utils');
+    var round_pr = utils.round_precision;
+
 
     screens.ScreenWidget.include({
         show: function () {
@@ -37,12 +40,12 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                     }
                     return status.resolve(true);
                 }
-            }).fail(function (type, error) {
+            }).fail(function (error) {
                 self.pos.gui.show_popup('dialog', {
                     title: 'Warning !',
                     body: 'Your odoo system have offline, or your internet have problem',
                 });
-                return status.reject(false);
+                return status.reject(error);
             });
             return status;
         }
@@ -64,7 +67,7 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                     var line = order.lines[n];
                     var product_id = line[2]['product_id'];
                     var product = this.db.get_product_by_id(product_id);
-                    if (product.is_voucher) {
+                    if (product.is_voucher || line.is_voucher) {
                         this.wait_print_voucher = true;
                     }
                 }
@@ -318,8 +321,8 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                                         order.client_use_voucher(voucher)
                                     }
                                 }
-                            }).fail(function (type, error) {
-                                return self.pos.query_backend_fail(type, error);
+                            }).fail(function (error) {
+                                return self.pos.query_backend_fail(error);
                             });
                         }
                     },
@@ -459,9 +462,8 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                     return false;
                 }
                 var voucher_amount = selected_line.get_price_with_tax();
-                var validate;
-                var number = parseFloat(self.$('.number').val());
-                var period_days = parseFloat(self.$('.period_days').val());
+                var number = parseFloat(self.$('input[name="number"]').val());
+                var period_days = parseFloat(self.$('input[name="period_days"]').val());
                 var apply_type = self.$('.apply_type').val();
                 var method = self.$('.method').val();
                 var customer = self.pos.get_order().get_client();
@@ -473,25 +475,19 @@ odoo.define('pos_retail.screen_voucher', function (require) {
                     return self.pos.gui.show_screen('clientlist')
                 }
                 if (isNaN(number)) {
-                    self.wrong_input('.number');
-                    validate = false;
+                    return self.wrong_input('input[name="number"]', "(*) Card Number is Required");
                 } else {
-                    self.passed_input('.number');
+                    self.passed_input('input[name="number"]');
                 }
                 if (typeof period_days != 'number' || isNaN(period_days) || period_days <= 0) {
-                    self.wrong_input('.period_days');
-                    validate = false;
+                    return self.wrong_input('input[name="period_days"]', "(*) Period Days is Required and Bigger than 0");
                 } else {
-                    self.passed_input('.period_days');
+                    self.passed_input('input[name="period_days"]');
                 }
                 if (typeof voucher_amount != 'number' || isNaN(voucher_amount) || voucher_amount <= 0) {
-                    self.wrong_input('.voucher_amount');
-                    validate = false;
+                    return self.wrong_input('input[name="voucher_amount"]', "(*) Amount is Required and bigger than 0");
                 } else {
-                    self.passed_input('.voucher_amount');
-                }
-                if (validate == false) {
-                    return;
+                    self.passed_input('input[name="voucher_amount"]');
                 }
                 var voucher_data = {
                     apply_type: apply_type,
@@ -552,5 +548,56 @@ odoo.define('pos_retail.screen_voucher', function (require) {
         'condition': function () {
             return this.pos.config.print_voucher;
         }
+    });
+
+    var popup_manual_create_voucher = PopupWidget.extend({
+        template: 'popup_manual_create_voucher',
+        show: function (options) {
+            var self = this;
+            this.options = options;
+            this.options.value = round_pr(options.line_selected.reduce((function (sum, line) {
+                return sum + line.price_subtotal_incl;
+            }), 0), this.pos.currency.rounding);
+            if (this.options.order.partner_id) {
+                var partner_id = this.options.order.partner_id[0];
+                this.options.client = this.pos.db.get_partner_by_id(partner_id);
+            }
+            this._super(options);
+            this.$('.print-voucher').click(function () {
+                var fields = {};
+                self.$('.voucher-field').each(function (idx, el) {
+                    fields[el.name] = el.value || false;
+                });
+                fields['period_days'] = parseFloat(fields['period_days']);
+                fields['value'] = parseFloat(fields['value']);
+                if (!fields['number']) {
+                    return self.wrong_input('input[name="number"]', "(*) Card Number is Required");
+                }
+                if (fields['customer_id']) {
+                    fields['customer_id'] = parseInt(fields['customer_id']);
+                }
+                var status = new $.Deferred();
+                rpc.query({
+                    model: 'pos.voucher',
+                    method: 'order_return_become_voucher',
+                    args: [[], fields]
+                }).then(function (voucher_val) {
+                    self.pos.vouchers_created = [voucher_val];
+                    self.gui.show_screen(self.gui.startup_screen);
+                    self.gui.show_screen('vouchers_screen');
+                    status.resolve()
+                }).fail(function (error) {
+                    self.pos.query_backend_fail(error);
+                });
+                return status
+            });
+            this.$('.cancel').click(function () {
+                self.click_cancel();
+            });
+        }
+    });
+    gui.define_popup({
+        name: 'popup_manual_create_voucher',
+        widget: popup_manual_create_voucher
     });
 });

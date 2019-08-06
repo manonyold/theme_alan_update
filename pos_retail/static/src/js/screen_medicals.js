@@ -160,8 +160,8 @@ odoo.define('pos_retail.screen_medicals', function (require) {
                             self.clear_search();
                         })
                     }
-                }).fail(function (type, error) {
-                    return self.pos.query_backend_fail(type, error);
+                }).fail(function (error) {
+                    return self.pos.query_backend_fail(error);
                 });
             } else {
                 fields['subscriber_id'] = parseInt(fields['subscriber_id']);
@@ -198,8 +198,8 @@ odoo.define('pos_retail.screen_medicals', function (require) {
                             self.pos.trigger('change:medical_insurance');
                         }
                     })
-                }).fail(function (type, error) {
-                    return self.pos.query_backend_fail(type, error);
+                }).fail(function (error) {
+                    return self.pos.query_backend_fail(error);
                 });
             }
         },

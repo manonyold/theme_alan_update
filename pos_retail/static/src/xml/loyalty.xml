@@ -43,7 +43,7 @@
                                 </span>
                             </th>
                             <th>
-                                Next Point
+                                Future Point
                                 <span class='value next_point'>
                                     = <t t-esc="widget.format_currency_no_symbol(widget.pos.get_order().get_client_point()['next_point'])"/>
                                 </span>

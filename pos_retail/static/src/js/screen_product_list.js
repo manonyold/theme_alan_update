@@ -24,8 +24,10 @@ odoo.define('pos_retail.screen_product_list', function (require) {
             });
         },
         refresh_screen: function () {
-            this.pos.get_modifiers_backend('product.product');
-            this.apply_quickly_search_products();
+            var self = this;
+            this.pos.get_modifiers_backend_all_models().then(function () {
+                self.apply_quickly_search_products();
+            })
         },
         start: function () {
             var self = this;

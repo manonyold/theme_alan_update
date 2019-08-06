@@ -18,6 +18,7 @@
                             </table>
                         </div>
                     </div>
+                    <span class="card-issue"/>
                     <footer>
                         <div class="card-footer text-center">
                             <div class="btn btn-success confirm_return_order">

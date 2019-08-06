@@ -32,8 +32,8 @@ odoo.define('pos_retail.cash_management', function (require) {
                         body: 'Have something wrong, could not find your session'
                     })
                 }
-            }, function (type, err) {
-                calling.reject();
+            }, function (err) {
+                calling.reject(err);
                 self.pos.gui.show_popup('dialog', {
                     title: 'Warning',
                     body: 'Your session offline mode, could not calling odoo server'
@@ -138,7 +138,40 @@ odoo.define('pos_retail.cash_management', function (require) {
     gui.define_popup({name: 'popup_balance', widget: popup_balance});
 
     var popup_money_control = PopupWidget.extend({
-        template: 'popup_money_control'
+        template: 'popup_money_control',
+
+        click_confirm: function () {
+            var self = this;
+            var values = {};
+            values.reason = this.$('.reason').val();
+            values.amount = parseFloat(this.$('.amount').val());
+            values.session_id = this.pos.pos_session.id;
+            if (values.reason == "") {
+                return this.wrong_input("input[name='reason']", '(*) Reason could not blank');
+            } else {
+                this.passed_input("input[name='reason']")
+            }
+            if (values.amount <= 0) {
+                return this.wrong_input("input[name='amount']", '(*) Amount could not smaller or equal 0');
+            } else {
+                this.passed_input("input[name='amount']")
+            }
+            this.pos.gui.close_popup();
+            rpc.query({
+                model: 'cash.box.in',
+                method: 'cash_input_from_pos',
+                args: [0, values],
+            }).then(function (result) {
+                if (result) {
+                    return self.wrong_input("input[name='no_reason']", '(*) ' + JSON.stringify(result));
+                } else {
+                    $('.session').trigger('click');
+                }
+            });
+            if (this.options.confirm) {
+                this.options.confirm.call(this, {});
+            }
+        }
     });
     gui.define_popup({name: 'popup_money_control', widget: popup_money_control});
 
@@ -166,26 +199,6 @@ odoo.define('pos_retail.cash_management', function (require) {
             self.pos.gui.show_popup('popup_money_control', {
                 'title': 'Put Money In',
                 'body': 'Fill in this form if you put money in the cash register: ',
-                confirm: function () {
-                    var values = {};
-                    values.reason = this.$('.reason').val();
-                    values.amount = this.$('.amount').val();
-                    values.session_id = self.pos.pos_session.id;
-
-                    rpc.query({
-                        model: 'cash.box.in',
-                        method: 'cash_input_from_pos',
-                        args: [0, values],
-                    }).then(function (result) {
-                        if (result)
-                            self.pos.gui.show_popup('error', {
-                                'title': 'Put Money In',
-                                'body': JSON.stringify(result),
-                            });
-                        else
-                            $('.session').trigger('click');
-                    });
-                },
                 cancel: function () {
                     $('.session').trigger('click');
                 }
@@ -196,25 +209,6 @@ odoo.define('pos_retail.cash_management', function (require) {
             self.pos.gui.show_popup('popup_money_control', {
                 'title': 'Take Money Out',
                 'body': 'Describe why you take money from the cash register: ',
-                confirm: function () {
-                    var values = {};
-                    values.reason = this.$('.reason').val();
-                    values.amount = this.$('.amount').val();
-                    values.session_id = self.pos.pos_session.id;
-                    rpc.query({
-                        model: 'cash.box.out',
-                        method: 'cash_input_from_pos',
-                        args: [0, values],
-                    }).then(function (result) {
-                        if (result)
-                            self.pos.gui.show_popup('error', {
-                                'title': 'Take Money Out',
-                                'body': JSON.stringify(result),
-                            });
-                        else
-                            $('.session').trigger('click');
-                    });
-                },
                 cancel: function () {
                     $('.session').trigger('click');
                 }
@@ -291,17 +285,8 @@ odoo.define('pos_retail.cash_management', function (require) {
             }).then(function (result) {
                 self.gui.close_popup();
                 self.gui.close();
-            }, function (err, event) {
-                event.preventDefault();
-                var err_msg = 'Please verify the details given or Check the Internet Connection./n';
-                if (err.data.message)
-                    err_msg = err.data.message;
-                self.gui.show_popup('alert', {
-                    'title': _t('Odoo Warning'),
-                    'body': _t(err_msg),
-                    cancel: function () {
-                    }
-                });
+            }, function (err) {
+                self.pos.query_backend_fail(err);
             });
         },
         enf_of_session: function () {
@@ -313,15 +298,8 @@ odoo.define('pos_retail.cash_management', function (require) {
                 args: [id]
             }).then(function (result) {
                 $('.session').trigger('click');
-            }, function (err, event) {
-                event.preventDefault();
-                var err_msg = 'Please verify the details given or Check the Internet Connection./n';
-                if (err.data.message)
-                    err_msg = err.data.message;
-                self.gui.show_popup('alert', {
-                    'title': _t('Odoo Warning'),
-                    'body': _t(err_msg),
-                });
+            }, function (err) {
+                self.pos.query_backend_fail(err);
             });
         },
         print_pos_session_report: function () {
